@@ -64,16 +64,15 @@ signupForm.addEventListener('submit', async (e) => {
     return setError(signupError, error.message);
   }
 
-  // Success
   alert(' Account created! You can now sign in.');
   switchTab('login');
-  loginEmail.value = email; // pre-fill email
+  loginEmail.value = email; 
   loginPassword.value = '';
   signupEmail.value = '';
   signupPassword.value = '';
 });
 
-// ---- SIGN IN ----
+
 loginForm.addEventListener('submit', async (e) => {
   e.preventDefault();
   loginError.classList.add('hidden');
