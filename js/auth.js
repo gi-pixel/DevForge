@@ -65,7 +65,7 @@ signupForm.addEventListener('submit', async (e) => {
   }
 
   // Success
-  alert('✅ Account created! You can now sign in.');
+  alert(' Account created! You can now sign in.');
   switchTab('login');
   loginEmail.value = email; // pre-fill email
   loginPassword.value = '';
@@ -91,7 +91,7 @@ loginForm.addEventListener('submit', async (e) => {
   }
 
   // Signed in successfully -> redirect to projects
-  window.location.href = '/project.html';
+  window.location.href = '/projects.html';
 });
 
 // ---- Auto-redirect if already logged in ----
