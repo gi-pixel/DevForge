@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Welcome · Project Manager</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+</head>
+<body class="min-h-screen bg-gradient-to-br from-purple-50 to-white flex items-center justify-center p-4 font-sans">
+
+  <div class="bg-white rounded-2xl shadow-xl max-w-md w-full p-8 border border-purple-100 transition-all">
+
+    <!-- Brand -->
+    <div class="text-center mb-8">
+      <div class="text-4xl text-purple-600 mb-2"><i class="fas fa-project-diagram"></i></div>
+      <h1 class="text-2xl font-bold text-gray-800">Project Flow</h1>
+      <p class="text-sm text-gray-500 mt-1">Sign in to manage your projects</p>
+    </div>
+
+    <!-- Tab Switcher -->
+    <div class="flex bg-gray-100 rounded-lg p-1 mb-6">
+      <button id="loginTab" class="flex-1 py-2.5 text-sm font-semibold rounded-md transition bg-white text-purple-700 shadow-sm">
+        <i class="fas fa-sign-in-alt mr-2"></i>Sign In
+      </button>
+      <button id="signupTab" class="flex-1 py-2.5 text-sm font-semibold rounded-md transition text-gray-500 hover:text-gray-700">
+        <i class="fas fa-user-plus mr-2"></i>Sign Up
+      </button>
+    </div>
+
+    <!-- Login Form -->
+    <form id="loginForm" class="space-y-4">
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+        <input type="email" id="loginEmail" placeholder="you@example.com" required
+               class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-purple-400 focus:border-transparent outline-none transition" />
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Password</label>
+        <input type="password" id="loginPassword" placeholder="••••••••" required
+               class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-purple-400 focus:border-transparent outline-none transition" />
+      </div>
+      <button type="submit" class="w-full bg-purple-600 hover:bg-purple-700 text-white font-semibold py-3 rounded-lg shadow-sm transition flex items-center justify-center gap-2">
+        <i class="fas fa-arrow-right-to-bracket"></i> Sign In
+      </button>
+      <p id="loginError" class="text-sm text-red-500 text-center hidden"></p>
+    </form>
+
+    <!-- Signup Form -->
+    <form id="signupForm" class="space-y-4 hidden">
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+        <input type="email" id="signupEmail" placeholder="you@example.com" required
+               class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-purple-400 focus:border-transparent outline-none transition" />
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Password</label>
+        <input type="password" id="signupPassword" placeholder="Min 6 characters" required minlength="6"
+               class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-purple-400 focus:border-transparent outline-none transition" />
+      </div>
+      <button type="submit" class="w-full bg-purple-600 hover:bg-purple-700 text-white font-semibold py-3 rounded-lg shadow-sm transition flex items-center justify-center gap-2">
+        <i class="fas fa-user-plus"></i> Create Account
+      </button>
+      <p id="signupError" class="text-sm text-red-500 text-center hidden"></p>
+      <p class="text-xs text-gray-400 text-center mt-2">
+        By signing up, you agree to our terms. <br />
+        <span class="text-yellow-600">Supabase email confirmation is disabled by default for testing.</span>
+      </p>
+    </form>
+
+    <!-- Demo helper -->
+    <p class="text-xs text-gray-400 text-center mt-6 border-t border-gray-100 pt-4">
+      <i class="fas fa-lock-open mr-1"></i> RLS enabled — you'll only see your own data.
+    </p>
+  </div>
+
+  <!-- Link Auth JS -->
+  <script type="module" src="./js/auth.js"></script>
+</body>
+</html>

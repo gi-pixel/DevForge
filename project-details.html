@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Project Details</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+</head>
+<body class="bg-gray-50 font-sans antialiased p-4 md:p-8">
+
+  <div class="max-w-5xl mx-auto">
+
+    <!-- Navigation & Header -->
+    <div class="flex flex-wrap items-center justify-between gap-4 mb-6">
+      <div class="flex items-center gap-3">
+        <a href="/project.html" class="text-purple-600 hover:text-purple-800 text-lg">
+          <i class="fas fa-arrow-left"></i>
+        </a>
+        <h1 class="text-2xl md:text-3xl font-bold text-purple-700 flex items-center gap-2">
+          <i class="fas fa-folder-open text-purple-500"></i>
+          <span id="projectNameDisplay">Loading...</span>
+        </h1>
+      </div>
+      <div class="flex items-center gap-3">
+        <span class="text-sm text-gray-600 bg-white px-3 py-1.5 rounded-full shadow-sm border border-gray-200">
+          <i class="fas fa-user-circle text-purple-500 mr-1"></i> <span id="userEmail">Loading...</span>
+        </span>
+        <button id="logoutBtn" class="bg-white hover:bg-gray-100 text-gray-700 border border-gray-200 font-medium py-2 px-4 rounded-lg shadow-sm transition flex items-center gap-2 text-sm">
+          <i class="fas fa-sign-out-alt text-purple-500"></i> Logout
+        </button>
+      </div>
+    </div>
+
+    <!-- Project Info Card -->
+    <div class="bg-white rounded-xl shadow-md border border-gray-100 p-6 mb-6">
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div>
+          <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Description</p>
+          <p id="projectDescDisplay" class="text-gray-700 mt-1">—</p>
+        </div>
+        <div>
+          <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Status</p>
+          <span id="projectStatusBadge" class="inline-flex px-3 py-1 text-xs font-semibold rounded-full mt-1">Active</span>
+        </div>
+        <div>
+          <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Deadline</p>
+          <p id="projectDeadlineDisplay" class="text-gray-700 mt-1">—</p>
+        </div>
+      </div>
+      <div class="mt-4">
+        <div class="flex justify-between text-sm font-medium text-gray-600 mb-1">
+          <span>Progress</span>
+          <span id="progressPercent">0%</span>
+        </div>
+        <div class="w-full h-3 bg-gray-200 rounded-full overflow-hidden">
+          <div id="progressFill" class="h-full bg-purple-600 rounded-full transition-all duration-500" style="width: 0%"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tasks Section -->
+    <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
+      <h2 class="text-xl font-semibold text-gray-800 flex items-center gap-2">
+        <i class="fas fa-tasks text-purple-500"></i> Tasks
+        <span id="taskCount" class="text-sm font-normal text-gray-400">(0)</span>
+      </h2>
+      <button id="showCreateTaskBtn" class="bg-purple-600 hover:bg-purple-700 text-white font-semibold py-2 px-5 rounded-lg shadow-sm transition flex items-center gap-2 text-sm">
+        <i class="fas fa-plus"></i> Add Task
+      </button>
+    </div>
+
+    <!-- Tasks Table -->
+    <div class="bg-white rounded-xl shadow-md border border-gray-100 overflow-hidden">
+      <div class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-gray-200">
+          <thead class="bg-purple-50">
+            <tr>
+              <th class="px-6 py-3 text-left text-xs font-semibold text-purple-800 uppercase tracking-wider">Task</th>
+              <th class="px-6 py-3 text-left text-xs font-semibold text-purple-800 uppercase tracking-wider">Description</th>
+              <th class="px-6 py-3 text-left text-xs font-semibold text-purple-800 uppercase tracking-wider">Status</th>
+              <th class="px-6 py-3 text-left text-xs font-semibold text-purple-800 uppercase tracking-wider">Due Date</th>
+              <th class="px-6 py-3 text-right text-xs font-semibold text-purple-800 uppercase tracking-wider">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="taskTableBody" class="divide-y divide-gray-100 bg-white"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== CREATE TASK MODAL ========== -->
+  <div id="createTaskModal" class="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 hidden transition-opacity">
+    <div class="bg-white rounded-2xl shadow-2xl max-w-lg w-full mx-4 p-6">
+      <div class="flex justify-between items-center mb-5">
+        <h3 class="text-xl font-bold text-purple-700 flex items-center gap-2"><i class="fas fa-plus-circle"></i> New Task</h3>
+        <button id="closeCreateTaskBtn" class="text-gray-400 hover:text-gray-600 text-xl">&times;</button>
+      </div>
+      <div class="space-y-4">
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Task Title</label>
+          <input type="text" id="createTaskTitle" placeholder="e.g. Design homepage" class="w-full px-4 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-purple-400 focus:border-transparent outline-none" />
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Description</label>
+          <input type="text" id="createTaskDesc" placeholder="Optional details" class="w-full px-4 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-purple-400 focus:border-transparent outline-none" />
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Due Date</label>
+          <input type="date" id="createTaskDue" class="w-full px-4 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-purple-400 focus:border-transparent outline-none" />
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Status</label>
+          <select id="createTaskStatus" class="w-full px-4 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-purple-400 focus:border-transparent outline-none bg-white">
+            <option value="Pending">Pending</option>
+            <option value="In Progress">In Progress</option>
+            <option value="Completed">Completed</option>
+          </select>
+        </div>
+      </div>
+      <div class="flex justify-end gap-3 mt-6">
+        <button id="cancelCreateTaskBtn" class="px-5 py-2.5 border border-gray-200 rounded-lg text-gray-600 hover:bg-gray-50 transition">Cancel</button>
+        <button id="saveCreateTaskBtn" class="px-6 py-2.5 bg-purple-600 hover:bg-purple-700 text-white font-semibold rounded-lg shadow-sm transition flex items-center gap-2"><i class="fas fa-check"></i> Create Task</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== EDIT TASK MODAL ========== -->
+  <div id="editTaskModal" class="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 hidden transition-opacity">
+    <div class="bg-white rounded-2xl shadow-2xl max-w-lg w-full mx-4 p-6">
+      <div class="flex justify-between items-center mb-5">
+        <h3 class="text-xl font-bold text-purple-700 flex items-center gap-2"><i class="fas fa-pen"></i> Edit Task</h3>
+        <button id="closeEditTaskBtn" class="text-gray-400 hover:text-gray-600 text-xl">&times;</button>
+      </div>
+      <input type="hidden" id="editTaskId" />
+      <div class="space-y-4">
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Task Title</label>
+          <input type="text" id="editTaskTitle" class="w-full px-4 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-purple-400 focus:border-transparent outline-none" />
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Description</label>
+          <input type="text" id="editTaskDesc" class="w-full px-4 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-purple-400 focus:border-transparent outline-none" />
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Due Date</label>
+          <input type="date" id="editTaskDue" class="w-full px-4 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-purple-400 focus:border-transparent outline-none" />
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Status</label>
+          <select id="editTaskStatus" class="w-full px-4 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-purple-400 focus:border-transparent outline-none bg-white">
+            <option value="Pending">Pending</option>
+            <option value="In Progress">In Progress</option>
+            <option value="Completed">Completed</option>
+          </select>
+        </div>
+      </div>
+      <div class="flex justify-end gap-3 mt-6">
+        <button id="cancelEditTaskBtn" class="px-5 py-2.5 border border-gray-200 rounded-lg text-gray-600 hover:bg-gray-50 transition">Cancel</button>
+        <button id="saveEditTaskBtn" class="px-6 py-2.5 bg-purple-600 hover:bg-purple-700 text-white font-semibold rounded-lg shadow-sm transition flex items-center gap-2"><i class="fas fa-save"></i> Update Task</button>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { supabase } from '../js/supabase.js';
+
+    // ---- AUTH GUARD ----
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      window.location.href = '/index.html';
+      throw new Error('Redirecting...');
+    }
+    document.getElementById('userEmail').textContent = user.email;
+
+    // ---- LOGOUT ----
+    document.getElementById('logoutBtn').addEventListener('click', async () => {
+      await supabase.auth.signOut();
+      window.location.href = '/index.html';
+    });
+
+    // ---- Get Project ID from URL ----
+    const urlParams = new URLSearchParams(window.location.search);
+    const projectId = urlParams.get('id');
+    if (!projectId) {
+      alert('No project ID specified.');
+      window.location.href = '/project.html';
+      throw new Error('No project ID');
+    }
+
+    // ---- DOM refs ----
+    const projectNameDisplay = document.getElementById('projectNameDisplay');
+    const projectDescDisplay = document.getElementById('projectDescDisplay');
+    const projectStatusBadge = document.getElementById('projectStatusBadge');
+    const projectDeadlineDisplay = document.getElementById('projectDeadlineDisplay');
+    const progressFill = document.getElementById('progressFill');
+    const progressPercent = document.getElementById('progressPercent');
+
+    const taskTbody = document.getElementById('taskTableBody');
+    const taskCount = document.getElementById('taskCount');
+
+    // ---- Helpers ----
+    function statusBadgeClass(status) {
+      const map = {
+        'Active': 'bg-purple-100 text-purple-800',
+        'On Hold': 'bg-yellow-100 text-yellow-800',
+        'Completed': 'bg-green-100 text-green-800',
+        'Archived': 'bg-gray-100 text-gray-800',
+      };
+      return map[status] || 'bg-gray-100 text-gray-800';
+    }
+
+    function taskStatusBadge(status) {
+      const map = {
+        'Pending': 'bg-yellow-100 text-yellow-800',
+        'In Progress': 'bg-blue-100 text-blue-800',
+        'Completed': 'bg-green-100 text-green-800',
+      };
+      return map[status] || 'bg-gray-100 text-gray-800';
+    }
+
+    function escapeHtml(text) {
+      if (!text) return '';
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
+    function openModal(modal) { modal.classList.remove('hidden'); modal.classList.add('flex'); }
+    function closeModal(modal) { modal.classList.add('hidden'); modal.classList.remove('flex'); }
+
+    // ---- Update Project Progress ----
+    async function updateProjectProgress(projId) {
+      // Count total tasks and completed tasks for this project
+      const { data: tasks, error } = await supabase
+        .from('tasks')
+        .select('status')
+        .eq('project_id', projId);
+
+      if (error) {
+        console.error('Error counting tasks:', error);
+        return;
+      }
+
+      const total = tasks.length;
+      const completed = tasks.filter(t => t.status === 'Completed').length;
+      const progress = total === 0 ? 0 : Math.round((completed / total) * 100);
+
+      // Update the project's progress field
+      const { error: updateError } = await supabase
+        .from('projects')
+        .update({ progress })
+        .eq('id', projId)
+        .eq('user_id', user.id);
+
+      if (updateError) {
+        console.error('Error updating progress:', updateError);
+        return;
+      }
+
+      // Update UI
+      progressFill.style.width = progress + '%';
+      progressPercent.textContent = progress + '%';
+      return progress;
+    }
+
+    // ---- Load Project Info ----
+    async function loadProjectInfo() {
+      const { data, error } = await supabase
+        .from('projects')
+        .select('*')
+        .eq('id', projectId)
+        .eq('user_id', user.id)
+        .single();
+
+      if (error || !data) {
+        alert('Project not found or you do not have access.');
+        window.location.href = '/projects.html';
+        return;
+      }
+
+      projectNameDisplay.textContent = data.name;
+      projectDescDisplay.textContent = data.description || '—';
+      projectStatusBadge.textContent = data.status || 'Active';
+      projectStatusBadge.className = `inline-flex px-3 py-1 text-xs font-semibold rounded-full mt-1 ${statusBadgeClass(data.status)}`;
+      projectDeadlineDisplay.textContent = data.deadline ? new Date(data.deadline).toLocaleDateString() : '—';
+
+      // Set progress bar
+      progressFill.style.width = (data.progress || 0) + '%';
+      progressPercent.textContent = (data.progress || 0) + '%';
+    }
+
+    // ---- Load Tasks ----
+    async function loadTasks() {
+      const { data, error } = await supabase
+        .from('tasks')
+        .select('*')
+        .eq('project_id', projectId)
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        console.error('Error loading tasks:', error);
+        taskTbody.innerHTML = `<tr><td colspan="5" class="text-center py-8 text-red-500">Failed to load tasks.</td></tr>`;
+        return;
+      }
+
+      taskCount.textContent = `(${data?.length || 0})`;
+
+      if (!data || data.length === 0) {
+        taskTbody.innerHTML = `<tr><td colspan="5" class="text-center py-10 text-gray-400"><i class="fas fa-clipboard-list text-3xl block mb-2"></i>No tasks yet. Add your first task!</td></tr>`;
+        return;
+      }
+
+      taskTbody.innerHTML = data.map(t => `
+        <tr class="hover:bg-purple-50/50 transition">
+          <td class="px-6 py-4 font-medium text-gray-800">${escapeHtml(t.title)}</td>
+          <td class="px-6 py-4 text-gray-500 text-sm max-w-xs truncate">${escapeHtml(t.description || '—')}</td>
+          <td class="px-6 py-4"><span class="inline-flex px-3 py-1 text-xs font-semibold rounded-full ${taskStatusBadge(t.status)}">${t.status || 'Pending'}</span></td>
+          <td class="px-6 py-4 text-sm text-gray-500">${t.due_date ? new Date(t.due_date).toLocaleDateString() : '—'}</td>
+          <td class="px-6 py-4 text-right space-x-1">
+            <button class="edit-task-btn text-purple-600 hover:text-purple-800 transition px-2 py-1 rounded" data-id="${t.id}" title="Edit"><i class="fas fa-edit"></i></button>
+            <button class="delete-task-btn text-red-500 hover:text-red-700 transition px-2 py-1 rounded" data-id="${t.id}" title="Delete"><i class="fas fa-trash-alt"></i></button>
+          </td>
+        </tr>
+      `).join('');
+
+      document.querySelectorAll('.edit-task-btn').forEach(btn =>
+        btn.addEventListener('click', () => openEditTaskModal(btn.dataset.id))
+      );
+      document.querySelectorAll('.delete-task-btn').forEach(btn =>
+        btn.addEventListener('click', () => deleteTask(btn.dataset.id))
+      );
+    }
+
+    // ---- Refresh Everything ----
+    async function refreshAll() {
+      await loadProjectInfo();
+      await loadTasks();
+      // Recalculate progress after tasks load
+      await updateProjectProgress(projectId);
+    }
+
+    // ---- CREATE TASK ----
+    async function createTask() {
+      const title = document.getElementById('createTaskTitle').value.trim();
+      if (!title) return alert('Task title is required.');
+
+      const { error } = await supabase.from('tasks').insert([{
+        project_id: projectId,
+        title,
+        description: document.getElementById('createTaskDesc').value.trim() || null,
+        due_date: document.getElementById('createTaskDue').value || null,
+        status: document.getElementById('createTaskStatus').value || 'Pending',
+      }]);
+
+      if (error) { console.error(error); alert('Failed to create task.'); return; }
+
+      // Reset & close
+      document.getElementById('createTaskTitle').value = '';
+      document.getElementById('createTaskDesc').value = '';
+      document.getElementById('createTaskDue').value = '';
+      document.getElementById('createTaskStatus').value = 'Pending';
+      closeModal(document.getElementById('createTaskModal'));
+      refreshAll();
+    }
+
+    // ---- EDIT TASK ----
+    async function openEditTaskModal(id) {
+      const { data, error } = await supabase
+        .from('tasks')
+        .select('*')
+        .eq('id', id)
+        .single();
+
+      if (error || !data) { alert('Task not found.'); return; }
+
+      document.getElementById('editTaskId').value = data.id;
+      document.getElementById('editTaskTitle').value = data.title || '';
+      document.getElementById('editTaskDesc').value = data.description || '';
+      document.getElementById('editTaskDue').value = data.due_date || '';
+      document.getElementById('editTaskStatus').value = data.status || 'Pending';
+      openModal(document.getElementById('editTaskModal'));
+    }
+
+    async function saveEditTask() {
+      const id = document.getElementById('editTaskId').value;
+      const updated = {
+        title: document.getElementById('editTaskTitle').value.trim(),
+        description: document.getElementById('editTaskDesc').value.trim() || null,
+        due_date: document.getElementById('editTaskDue').value || null,
+        status: document.getElementById('editTaskStatus').value,
+      };
+      if (!updated.title) return alert('Task title is required.');
+
+      const { error } = await supabase
+        .from('tasks')
+        .update(updated)
+        .eq('id', id);
+
+      if (error) { alert('Failed to update task.'); return; }
+
+      closeModal(document.getElementById('editTaskModal'));
+      refreshAll();
+    }
+
+    // ---- DELETE TASK ----
+    async function deleteTask(id) {
+      if (!confirm('Delete this task?')) return;
+      const { error } = await supabase.from('tasks').delete().eq('id', id);
+      if (error) { alert('Failed to delete task.'); return; }
+      refreshAll();
+    }
+
+    // ---- Modal Event Listeners ----
+    // Create Task
+    document.getElementById('showCreateTaskBtn').addEventListener('click', () => openModal(document.getElementById('createTaskModal')));
+    document.getElementById('closeCreateTaskBtn').addEventListener('click', () => closeModal(document.getElementById('createTaskModal')));
+    document.getElementById('cancelCreateTaskBtn').addEventListener('click', () => closeModal(document.getElementById('createTaskModal')));
+    document.getElementById('saveCreateTaskBtn').addEventListener('click', createTask);
+    document.getElementById('createTaskModal').addEventListener('click', (e) => { if (e.target === e.currentTarget) closeModal(e.currentTarget); });
+
+    // Edit Task
+    document.getElementById('closeEditTaskBtn').addEventListener('click', () => closeModal(document.getElementById('editTaskModal')));
+    document.getElementById('cancelEditTaskBtn').addEventListener('click', () => closeModal(document.getElementById('editTaskModal')));
+    document.getElementById('saveEditTaskBtn').addEventListener('click', saveEditTask);
+    document.getElementById('editTaskModal').addEventListener('click', (e) => { if (e.target === e.currentTarget) closeModal(e.currentTarget); });
+
+    // ---- Initial Load ----
+    refreshAll();
+  </script>
+</body>
+</html>
