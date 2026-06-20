@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>My Projects</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+  <style>
+    /* ---- Sidebar styles (collapsible) ---- */
+    .sidebar {
+      width: 240px;
+      transition: width 0.3s ease-in-out;
+      z-index: 40;
+      background: white;
+      border-right: 1px solid #e5e7eb;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+      display: flex;
+      flex-direction: column;
+      position: fixed;
+      top: 0;
+      left: 0;
+      height: 100vh;
+    }
+    .sidebar.collapsed {
+      width: 64px;
+    }
+    .sidebar.collapsed .nav-link span,
+    .sidebar.collapsed .logo-text,
+    .sidebar.collapsed .user-email-text {
+      display: none;
+    }
+    .sidebar.collapsed .nav-link {
+      justify-content: center;
+    }
+    .sidebar.collapsed .nav-link i {
+      margin-right: 0;
+    }
+    .sidebar.collapsed .user-info {
+      justify-content: center;
+    }
+    .sidebar.collapsed .toggle-btn i {
+      transform: rotate(180deg);
+    }
+    /* Main content margin */
+    .main-content {
+      margin-left: 240px;
+      transition: margin-left 0.3s ease-in-out;
+    }
+    .main-content.shifted {
+      margin-left: 64px;
+    }
+    /* Overlay for mobile */
+    .sidebar-overlay {
+      z-index: 30;
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.3);
+    }
+    .sidebar-overlay.open {
+      display: block;
+    }
+    /* Mobile: sidebar slides out */
+    @media (max-width: 767px) {
+      .sidebar {
+        transform: translateX(-100%);
+        width: 240px !important;
+      }
+      .sidebar.open {
+        transform: translateX(0);
+      }
+      .main-content {
+        margin-left: 0 !important;
+      }
+      .hamburger-btn {
+        display: block !important;
+      }
+      .sidebar .toggle-btn {
+        display: none; /* hide collapse on mobile */
+      }
+    }
+    @media (min-width: 768px) {
+      .hamburger-btn {
+        display: none !important;
+      }
+      .sidebar .toggle-btn {
+        display: flex;
+      }
+    }
+    .nav-link {
+      transition: background 0.15s, color 0.15s;
+    }
+    .nav-link.active {
+      background: #7C3AED;
+      color: white;
+    }
+    .nav-link.active i {
+      color: white;
+    }
+    .progress-fill {
+      transition: width 0.3s ease;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ===== SIDEBAR ===== -->
+  <aside class="sidebar" id="mainSidebar">
+    <!-- Logo -->
+    <div class="px-4 py-5 border-b border-gray-100 flex items-center gap-2">
+      <i class="fas fa-project-diagram text-purple-600 text-xl"></i>
+      <span class="logo-text text-xl font-bold text-purple-700">Project Flow</span>
+    </div>
+    <!-- Nav links -->
+    <nav class="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
+      <a href="/dashboard.html" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-600 hover:bg-purple-50 hover:text-purple-700 transition">
+        <i class="fas fa-chart-pie w-5 text-purple-400"></i>
+        <span>Dashboard</span>
+      </a>
+      <a href="/projects.html" class="nav-link active flex items-center gap-3 px-3 py-2.5 rounded-lg transition">
+        <i class="fas fa-folder-open w-5"></i>
+        <span>Projects</span>
+      </a>
+    </nav>
+    <!-- Bottom: user + toggle + logout -->
+    <div class="border-t border-gray-100 p-4 space-y-3">
+      <div class="user-info flex items-center gap-2 text-sm text-gray-600 truncate">
+        <i class="fas fa-user-circle text-purple-500"></i>
+        <span class="user-email-text truncate" id="sidebarUserEmail">user@example.com</span>
+      </div>
+      <!-- Collapse toggle button -->
+      <button id="sidebarToggleBtn" class="toggle-btn w-full flex items-center justify-center gap-2 px-3 py-2 text-sm text-gray-500 hover:bg-purple-50 hover:text-purple-600 rounded-lg transition">
+        <i class="fas fa-chevron-left"></i>
+        <span class="toggle-label">Collapse</span>
+      </button>
+      <button id="sidebarLogoutBtn" class="w-full flex items-center gap-2 px-3 py-2 text-sm text-gray-600 hover:bg-red-50 hover:text-red-600 rounded-lg transition">
+        <i class="fas fa-sign-out-alt"></i>
+        <span>Logout</span>
+      </button>
+    </div>
+  </aside>
+  
+  <div id="sidebarOverlay" class="sidebar-overlay" onclick="closeSidebar()"></div>
+
+  <!-- ===== MAIN CONTENT ===== -->
+  <main class="main-content min-h-screen" id="mainContent">
+    <header class="bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between md:justify-end shadow-sm">
+      <button id="hamburgerBtn" class="hamburger-btn text-gray-600 hover:text-purple-600 text-2xl">
+        <i class="fas fa-bars"></i>
+      </button>
+      <span class="md:hidden text-lg font-semibold text-purple-700">Project Flow</span>
+      <div class="flex items-center gap-3">
+        <button id="showCreateModalBtn" class="bg-purple-600 hover:bg-purple-700 text-white font-semibold py-2 px-4 rounded-lg shadow-sm transition flex items-center gap-2 text-sm">
+          <i class="fas fa-plus"></i> Add Project
+        </button>
+      </div>
+    </header>
+
+    <div class="p-4 md:p-8">
+      <div class="max-w-7xl mx-auto">
+        <!-- Stats -->
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-5 mb-6">
+          <!-- Total Projects -->
+          <div class="group bg-gradient-to-br from-white to-purple-50 rounded-2xl shadow-sm hover:shadow-md hover:-translate-y-1 transition-all duration-300 p-5 flex items-center gap-4 border border-purple-100">
+            <div class="w-12 h-12 rounded-xl bg-purple-100 flex items-center justify-center text-purple-600 text-xl group-hover:scale-110 transition-transform">
+              <i class="fas fa-folder-open"></i>
+            </div>
+            <div>
+              <p class="text-xs font-semibold text-purple-600 uppercase tracking-wider">Total Projects</p>
+              <p class="text-3xl font-bold text-gray-800" id="totalProjects">0</p>
+            </div>
+          </div>
+
+          <!-- Completed -->
+          <div class="group bg-gradient-to-br from-white to-green-50 rounded-2xl shadow-sm hover:shadow-md hover:-translate-y-1 transition-all duration-300 p-5 flex items-center gap-4 border border-green-100">
+            <div class="w-12 h-12 rounded-xl bg-green-100 flex items-center justify-center text-green-600 text-xl group-hover:scale-110 transition-transform">
+              <i class="fas fa-check-circle"></i>
+            </div>
+            <div>
+              <p class="text-xs font-semibold text-green-600 uppercase tracking-wider">Completed</p>
+              <p class="text-3xl font-bold text-gray-800" id="completedProjects">0</p>
+            </div>
+          </div>
+
+          <!-- Active -->
+          <div class="group bg-gradient-to-br from-white to-blue-50 rounded-2xl shadow-sm hover:shadow-md hover:-translate-y-1 transition-all duration-300 p-5 flex items-center gap-4 border border-blue-100">
+            <div class="w-12 h-12 rounded-xl bg-blue-100 flex items-center justify-center text-blue-600 text-xl group-hover:scale-110 transition-transform">
+              <i class="fas fa-play-circle"></i>
+            </div>
+            <div>
+              <p class="text-xs font-semibold text-blue-600 uppercase tracking-wider">Active</p>
+              <p class="text-3xl font-bold text-gray-800" id="activeProjects">0</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Projects Table -->
+        <div class="bg-white rounded-xl shadow-md border border-gray-100 overflow-hidden">
+          <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+              <thead class="bg-purple-50">
+                <tr>
+                  <th class="px-6 py-4 text-left text-xs font-semibold text-purple-800 uppercase tracking-wider">Project</th>
+                  <th class="px-6 py-4 text-left text-xs font-semibold text-purple-800 uppercase tracking-wider">Description</th>
+                  <th class="px-6 py-4 text-left text-xs font-semibold text-purple-800 uppercase tracking-wider">Status</th>
+                  <th class="px-6 py-4 text-left text-xs font-semibold text-purple-800 uppercase tracking-wider">Progress</th>
+                  <th class="px-6 py-4 text-left text-xs font-semibold text-purple-800 uppercase tracking-wider">Deadline</th>
+                  <th class="px-6 py-4 text-right text-xs font-semibold text-purple-800 uppercase tracking-wider">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="projectTableBody" class="divide-y divide-gray-100 bg-white"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- ===== MODALS ===== -->
+  <!-- Create Modal -->
+  <div id="createModal" class="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 hidden transition-opacity">
+    <div class="bg-white rounded-2xl shadow-2xl max-w-lg w-full mx-4 p-6">
+      <div class="flex justify-between items-center mb-5">
+        <h3 class="text-xl font-bold text-purple-700 flex items-center gap-2"><i class="fas fa-plus-circle"></i> Create New Project</h3>
+        <button id="closeCreateModalBtn" class="text-gray-400 hover:text-gray-600 text-xl">&times;</button>
+      </div>
+      <div class="space-y-4">
+        <div><label class="block text-sm font-medium text-gray-700 mb-1">Project Name</label><input type="text" id="createName" placeholder="e.g. Marketing Website" class="w-full px-4 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-purple-400 focus:border-transparent outline-none" /></div>
+        <div><label class="block text-sm font-medium text-gray-700 mb-1">Description</label><input type="text" id="createDesc" placeholder="Brief description" class="w-full px-4 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-purple-400 focus:border-transparent outline-none" /></div>
+        <div><label class="block text-sm font-medium text-gray-700 mb-1">Deadline</label><input type="date" id="createDeadline" class="w-full px-4 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-purple-400 focus:border-transparent outline-none" /></div>
+        <div><label class="block text-sm font-medium text-gray-700 mb-1">Status</label><select id="createStatus" class="w-full px-4 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-purple-400 focus:border-transparent outline-none bg-white"><option value="Active">Active</option><option value="On Hold">On Hold</option><option value="Completed">Completed</option><option value="Archived">Archived</option></select></div>
+      </div>
+      <div class="flex justify-end gap-3 mt-6">
+        <button id="cancelCreateBtn" class="px-5 py-2.5 border border-gray-200 rounded-lg text-gray-600 hover:bg-gray-50 transition">Cancel</button>
+        <button id="saveCreateBtn" class="px-6 py-2.5 bg-purple-600 hover:bg-purple-700 text-white font-semibold rounded-lg shadow-sm transition flex items-center gap-2"><i class="fas fa-check"></i> Create Project</button>
+      </div>
+    </div>
+  </div>
+  <!-- Edit Modal -->
+  <div id="editModal" class="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 hidden transition-opacity">
+    <div class="bg-white rounded-2xl shadow-2xl max-w-lg w-full mx-4 p-6">
+      <div class="flex justify-between items-center mb-5">
+        <h3 class="text-xl font-bold text-purple-700 flex items-center gap-2"><i class="fas fa-pen"></i> Edit Project</h3>
+        <button id="closeEditModalBtn" class="text-gray-400 hover:text-gray-600 text-xl">&times;</button>
+      </div>
+      <input type="hidden" id="editProjectId" />
+      <div class="space-y-4">
+        <div><label class="block text-sm font-medium text-gray-700 mb-1">Project Name</label><input type="text" id="editName" class="w-full px-4 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-purple-400 focus:border-transparent outline-none" /></div>
+        <div><label class="block text-sm font-medium text-gray-700 mb-1">Description</label><input type="text" id="editDesc" class="w-full px-4 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-purple-400 focus:border-transparent outline-none" /></div>
+        <div><label class="block text-sm font-medium text-gray-700 mb-1">Deadline</label><input type="date" id="editDeadline" class="w-full px-4 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-purple-400 focus:border-transparent outline-none" /></div>
+        <div><label class="block text-sm font-medium text-gray-700 mb-1">Status</label><select id="editStatus" class="w-full px-4 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-purple-400 focus:border-transparent outline-none bg-white"><option value="Active">Active</option><option value="On Hold">On Hold</option><option value="Completed">Completed</option><option value="Archived">Archived</option></select></div>
+      </div>
+      <div class="flex justify-end gap-3 mt-6">
+        <button id="cancelEditBtn" class="px-5 py-2.5 border border-gray-200 rounded-lg text-gray-600 hover:bg-gray-50 transition">Cancel</button>
+        <button id="saveEditBtn" class="px-6 py-2.5 bg-purple-600 hover:bg-purple-700 text-white font-semibold rounded-lg shadow-sm transition flex items-center gap-2"><i class="fas fa-save"></i> Update Project</button>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { supabase } from '../js/supabase.js';
+
+    // ---- AUTH ----
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) { window.location.href = '/index.html'; throw new Error('Redirect'); }
+    document.getElementById('sidebarUserEmail').textContent = user.email;
+
+    // ---- SIDEBAR COLLAPSE (desktop only) ----
+    const sidebar = document.getElementById('mainSidebar');
+    const mainContent = document.getElementById('mainContent');
+    const toggleBtn = document.getElementById('sidebarToggleBtn');
+    const toggleIcon = toggleBtn.querySelector('i');
+    const toggleLabel = toggleBtn.querySelector('.toggle-label');
+
+    // Load state from localStorage
+    const isCollapsed = localStorage.getItem('sidebarCollapsed') === 'true';
+    if (isCollapsed) {
+      sidebar.classList.add('collapsed');
+      mainContent.classList.add('shifted');
+      toggleIcon.className = 'fas fa-chevron-right';
+      toggleLabel.textContent = 'Expand';
+    }
+
+    toggleBtn.addEventListener('click', () => {
+      const collapsed = sidebar.classList.toggle('collapsed');
+      mainContent.classList.toggle('shifted');
+      if (collapsed) {
+        toggleIcon.className = 'fas fa-chevron-right';
+        toggleLabel.textContent = 'Expand';
+        localStorage.setItem('sidebarCollapsed', 'true');
+      } else {
+        toggleIcon.className = 'fas fa-chevron-left';
+        toggleLabel.textContent = 'Collapse';
+        localStorage.setItem('sidebarCollapsed', 'false');
+      }
+    });
+
+    // ---- MOBILE SIDEBAR TOGGLE ----
+    const hamburger = document.getElementById('hamburgerBtn');
+    const overlay = document.getElementById('sidebarOverlay');
+    function openSidebar() { sidebar.classList.add('open'); overlay.classList.add('open'); }
+    function closeSidebar() { sidebar.classList.remove('open'); overlay.classList.remove('open'); }
+    hamburger.addEventListener('click', () => { if (sidebar.classList.contains('open')) closeSidebar(); else openSidebar(); });
+    // Overlay click also closes
+    overlay.addEventListener('click', closeSidebar);
+
+    // ---- LOGOUT ----
+    document.getElementById('sidebarLogoutBtn').addEventListener('click', async () => {
+      await supabase.auth.signOut();
+      window.location.href = '/index.html';
+    });
+
+    // ---- CRUD (same as before) ----
+    const tbody = document.getElementById('projectTableBody');
+    const totalEl = document.getElementById('totalProjects');
+    const completedEl = document.getElementById('completedProjects');
+    const activeEl = document.getElementById('activeProjects');
+
+    const createModal = document.getElementById('createModal');
+    const createName = document.getElementById('createName');
+    const createDesc = document.getElementById('createDesc');
+    const createDeadline = document.getElementById('createDeadline');
+    const createStatus = document.getElementById('createStatus');
+    const showCreateBtn = document.getElementById('showCreateModalBtn');
+    const closeCreateBtn = document.getElementById('closeCreateModalBtn');
+    const cancelCreateBtn = document.getElementById('cancelCreateBtn');
+    const saveCreateBtn = document.getElementById('saveCreateBtn');
+
+    const editModal = document.getElementById('editModal');
+    const editId = document.getElementById('editProjectId');
+    const editName = document.getElementById('editName');
+    const editDesc = document.getElementById('editDesc');
+    const editDeadline = document.getElementById('editDeadline');
+    const editStatus = document.getElementById('editStatus');
+    const closeEditBtn = document.getElementById('closeEditModalBtn');
+    const cancelEditBtn = document.getElementById('cancelEditBtn');
+    const saveEditBtn = document.getElementById('saveEditBtn');
+
+    function statusBadgeClass(status) {
+      const map = { 'Active': 'bg-purple-100 text-purple-800', 'On Hold': 'bg-yellow-100 text-yellow-800', 'Completed': 'bg-green-100 text-green-800', 'Archived': 'bg-gray-100 text-gray-800' };
+      return map[status] || 'bg-gray-100 text-gray-800';
+    }
+    function escapeHtml(text) { if (!text) return ''; const d = document.createElement('div'); d.textContent = text; return d.innerHTML; }
+    function openModal(m) { m.classList.remove('hidden'); m.classList.add('flex'); }
+    function closeModal(m) { m.classList.add('hidden'); m.classList.remove('flex'); }
+
+    async function loadProjects() {
+      const { data, error } = await supabase.from('projects').select('*').eq('user_id', user.id).order('created_at', { ascending: false });
+      if (error) { console.error(error); tbody.innerHTML = `<tr><td colspan="6" class="text-center py-10 text-red-500">Failed to load.</td></tr>`; return; }
+      const total = data?.length || 0, completed = data?.filter(p => p.status === 'Completed').length || 0, active = data?.filter(p => p.status === 'Active').length || 0;
+      totalEl.textContent = total; completedEl.textContent = completed; activeEl.textContent = active;
+      if (!data || data.length === 0) { tbody.innerHTML = `<tr><td colspan="6" class="text-center py-12 text-gray-400"><i class="fas fa-inbox text-3xl block mb-2"></i>No projects yet.</td></tr>`; return; }
+      tbody.innerHTML = data.map(p => `
+        <tr class="hover:bg-purple-50/50 transition">
+          <td class="px-6 py-4 font-medium text-gray-800">${escapeHtml(p.name)}</td>
+          <td class="px-6 py-4 text-gray-500 text-sm max-w-xs truncate">${escapeHtml(p.description || '—')}</td>
+          <td class="px-6 py-4"><span class="inline-flex px-3 py-1 text-xs font-semibold rounded-full ${statusBadgeClass(p.status)}">${p.status || 'Active'}</span></td>
+          <td class="px-6 py-4"><div class="flex items-center gap-3"><span class="text-sm font-medium text-gray-700">${p.progress || 0}%</span><div class="flex-1 max-w-[100px] h-2 bg-gray-200 rounded-full overflow-hidden"><div class="progress-fill h-full bg-purple-600 rounded-full" style="width: ${p.progress || 0}%"></div></div></div></td>
+          <td class="px-6 py-4 text-sm text-gray-500">${p.deadline ? new Date(p.deadline).toLocaleDateString() : '—'}</td>
+          <td class="px-6 py-4 text-right space-x-1">
+            <button class="view-btn text-blue-500 hover:text-blue-700 transition px-2 py-1 rounded" data-id="${p.id}"><i class="fas fa-eye"></i></button>
+            <button class="edit-btn text-purple-600 hover:text-purple-800 transition px-2 py-1 rounded" data-id="${p.id}"><i class="fas fa-edit"></i></button>
+            <button class="delete-btn text-red-500 hover:text-red-700 transition px-2 py-1 rounded" data-id="${p.id}"><i class="fas fa-trash-alt"></i></button>
+          </td>
+        </tr>
+      `).join('');
+      document.querySelectorAll('.view-btn').forEach(b => b.addEventListener('click', () => window.location.href = `/project-details.html?id=${b.dataset.id}`));
+      document.querySelectorAll('.edit-btn').forEach(b => b.addEventListener('click', () => openEditModal(b.dataset.id)));
+      document.querySelectorAll('.delete-btn').forEach(b => b.addEventListener('click', () => deleteProject(b.dataset.id)));
+    }
+
+    async function createProject() {
+      const name = createName.value.trim(); if (!name) return alert('Name required.');
+      const { error } = await supabase.from('projects').insert([{ user_id: user.id, name, description: createDesc.value.trim() || null, deadline: createDeadline.value || null, status: createStatus.value || 'Active', progress: 0 }]);
+      if (error) { alert('Failed.'); return; }
+      createName.value = ''; createDesc.value = ''; createDeadline.value = ''; createStatus.value = 'Active';
+      closeModal(createModal); loadProjects();
+    }
+
+    async function deleteProject(id) { if (!confirm('Delete?')) return; const { error } = await supabase.from('projects').delete().eq('id', id).eq('user_id', user.id); if (error) alert('Failed.'); else loadProjects(); }
+
+    async function openEditModal(id) {
+      const { data, error } = await supabase.from('projects').select('*').eq('id', id).eq('user_id', user.id).single();
+      if (error || !data) { alert('Not found.'); return; }
+      editId.value = data.id; editName.value = data.name || ''; editDesc.value = data.description || ''; editDeadline.value = data.deadline || ''; editStatus.value = data.status || 'Active';
+      openModal(editModal);
+    }
+    async function saveEdit() {
+      const id = editId.value, updated = { name: editName.value.trim(), description: editDesc.value.trim() || null, deadline: editDeadline.value || null, status: editStatus.value };
+      if (!updated.name) return alert('Name required.');
+      const { error } = await supabase.from('projects').update(updated).eq('id', id).eq('user_id', user.id);
+      if (error) { alert('Failed.'); return; }
+      closeModal(editModal); loadProjects();
+    }
+
+    showCreateBtn.addEventListener('click', () => openModal(createModal));
+    closeCreateBtn.addEventListener('click', () => closeModal(createModal));
+    cancelCreateBtn.addEventListener('click', () => closeModal(createModal));
+    saveCreateBtn.addEventListener('click', createProject);
+    createModal.addEventListener('click', (e) => { if (e.target === createModal) closeModal(createModal); });
+    closeEditBtn.addEventListener('click', () => closeModal(editModal));
+    cancelEditBtn.addEventListener('click', () => closeModal(editModal));
+    saveEditBtn.addEventListener('click', saveEdit);
+    editModal.addEventListener('click', (e) => { if (e.target === editModal) closeModal(editModal); });
+
+    loadProjects();
+  </script>
+</body>
+</html>

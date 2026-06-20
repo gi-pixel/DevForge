@@ -6,311 +6,322 @@
   <title>Project Details</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+  <style>
+    /* ---- Same sidebar styles ---- */
+    .sidebar {
+      width: 240px;
+      transition: width 0.3s ease-in-out;
+      z-index: 40;
+      background: white;
+      border-right: 1px solid #e5e7eb;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+      display: flex;
+      flex-direction: column;
+      position: fixed;
+      top: 0;
+      left: 0;
+      height: 100vh;
+    }
+    .sidebar.collapsed {
+      width: 64px;
+    }
+    .sidebar.collapsed .nav-link span,
+    .sidebar.collapsed .logo-text,
+    .sidebar.collapsed .user-email-text {
+      display: none;
+    }
+    .sidebar.collapsed .nav-link {
+      justify-content: center;
+    }
+    .sidebar.collapsed .nav-link i {
+      margin-right: 0;
+    }
+    .sidebar.collapsed .user-info {
+      justify-content: center;
+    }
+    .sidebar.collapsed .toggle-btn i {
+      transform: rotate(180deg);
+    }
+    .main-content {
+      margin-left: 240px;
+      transition: margin-left 0.3s ease-in-out;
+    }
+    .main-content.shifted {
+      margin-left: 64px;
+    }
+    .sidebar-overlay {
+      z-index: 30;
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.3);
+    }
+    .sidebar-overlay.open {
+      display: block;
+    }
+    @media (max-width: 767px) {
+      .sidebar {
+        transform: translateX(-100%);
+        width: 240px !important;
+      }
+      .sidebar.open {
+        transform: translateX(0);
+      }
+      .main-content {
+        margin-left: 0 !important;
+      }
+      .hamburger-btn {
+        display: block !important;
+      }
+      .sidebar .toggle-btn {
+        display: none;
+      }
+    }
+    @media (min-width: 768px) {
+      .hamburger-btn {
+        display: none !important;
+      }
+      .sidebar .toggle-btn {
+        display: flex;
+      }
+    }
+    .nav-link {
+      transition: background 0.15s, color 0.15s;
+    }
+    .nav-link.active {
+      background: #7C3AED;
+      color: white;
+    }
+    .nav-link.active i {
+      color: white;
+    }
+    .progress-fill {
+      transition: width 0.3s ease;
+    }
+  </style>
 </head>
-<body class="bg-gray-50 font-sans antialiased p-4 md:p-8">
+<body>
 
-  <div class="max-w-5xl mx-auto">
-
-    <!-- Navigation & Header -->
-    <div class="flex flex-wrap items-center justify-between gap-4 mb-6">
-      <div class="flex items-center gap-3">
-        <a href="/project.html" class="text-purple-600 hover:text-purple-800 text-lg">
-          <i class="fas fa-arrow-left"></i>
+  <!-- SIDEBAR (same) -->
+  <aside class="sidebar" id="mainSidebar">
+    <div class="px-4 py-5 border-b border-gray-100 flex items-center gap-2">
+      <i class="fas fa-project-diagram text-purple-600 text-xl"></i>
+      <span class="logo-text text-xl font-bold text-purple-700">Project Flow</span>
+    </div>
+    <nav class="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
+      <a href="/dashboard.html" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-600 hover:bg-purple-50 hover:text-purple-700 transition">
+        <i class="fas fa-chart-pie w-5 text-purple-400"></i>
+        <span>Dashboard</span>
+      </a>
+      <a href="/projects.html" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-600 hover:bg-purple-50 hover:text-purple-700 transition">
+        <i class="fas fa-folder-open w-5 text-purple-400"></i>
+        <span>Projects</span>
+      </a>
+      <!-- Dynamic Back to Project -->
+      <div id="navDetailsContainer" class="hidden">
+        <a href="#" id="navDetailsLink" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-600 hover:bg-purple-50 hover:text-purple-700 transition">
+          <i class="fas fa-arrow-left w-5 text-purple-400"></i>
+          <span>Back to Project</span>
         </a>
-        <h1 class="text-2xl md:text-3xl font-bold text-purple-700 flex items-center gap-2">
-          <i class="fas fa-folder-open text-purple-500"></i>
-          <span id="projectNameDisplay">Loading...</span>
-        </h1>
       </div>
-      <div class="flex items-center gap-3">
-        <span class="text-sm text-gray-600 bg-white px-3 py-1.5 rounded-full shadow-sm border border-gray-200">
-          <i class="fas fa-user-circle text-purple-500 mr-1"></i> <span id="userEmail">Loading...</span>
-        </span>
-        <button id="logoutBtn" class="bg-white hover:bg-gray-100 text-gray-700 border border-gray-200 font-medium py-2 px-4 rounded-lg shadow-sm transition flex items-center gap-2 text-sm">
-          <i class="fas fa-sign-out-alt text-purple-500"></i> Logout
-        </button>
+    </nav>
+    <div class="border-t border-gray-100 p-4 space-y-3">
+      <div class="user-info flex items-center gap-2 text-sm text-gray-600 truncate">
+        <i class="fas fa-user-circle text-purple-500"></i>
+        <span class="user-email-text truncate" id="sidebarUserEmail">user@example.com</span>
       </div>
-    </div>
-
-    <!-- Project Info Card -->
-    <div class="bg-white rounded-xl shadow-md border border-gray-100 p-6 mb-6">
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div>
-          <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Description</p>
-          <p id="projectDescDisplay" class="text-gray-700 mt-1">—</p>
-        </div>
-        <div>
-          <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Status</p>
-          <span id="projectStatusBadge" class="inline-flex px-3 py-1 text-xs font-semibold rounded-full mt-1">Active</span>
-        </div>
-        <div>
-          <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Deadline</p>
-          <p id="projectDeadlineDisplay" class="text-gray-700 mt-1">—</p>
-        </div>
-      </div>
-      <div class="mt-4">
-        <div class="flex justify-between text-sm font-medium text-gray-600 mb-1">
-          <span>Progress</span>
-          <span id="progressPercent">0%</span>
-        </div>
-        <div class="w-full h-3 bg-gray-200 rounded-full overflow-hidden">
-          <div id="progressFill" class="h-full bg-purple-600 rounded-full transition-all duration-500" style="width: 0%"></div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Tasks Section -->
-    <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
-      <h2 class="text-xl font-semibold text-gray-800 flex items-center gap-2">
-        <i class="fas fa-tasks text-purple-500"></i> Tasks
-        <span id="taskCount" class="text-sm font-normal text-gray-400">(0)</span>
-      </h2>
-      <button id="showCreateTaskBtn" class="bg-purple-600 hover:bg-purple-700 text-white font-semibold py-2 px-5 rounded-lg shadow-sm transition flex items-center gap-2 text-sm">
-        <i class="fas fa-plus"></i> Add Task
+      <button id="sidebarToggleBtn" class="toggle-btn w-full flex items-center justify-center gap-2 px-3 py-2 text-sm text-gray-500 hover:bg-purple-50 hover:text-purple-600 rounded-lg transition">
+        <i class="fas fa-chevron-left"></i>
+        <span class="toggle-label">Collapse</span>
+      </button>
+      <button id="sidebarLogoutBtn" class="w-full flex items-center gap-2 px-3 py-2 text-sm text-gray-600 hover:bg-red-50 hover:text-red-600 rounded-lg transition">
+        <i class="fas fa-sign-out-alt"></i>
+        <span>Logout</span>
       </button>
     </div>
+  </aside>
+  <div id="sidebarOverlay" class="sidebar-overlay" onclick="closeSidebar()"></div>
 
-    <!-- Tasks Table -->
-    <div class="bg-white rounded-xl shadow-md border border-gray-100 overflow-hidden">
-      <div class="overflow-x-auto">
-        <table class="min-w-full divide-y divide-gray-200">
-          <thead class="bg-purple-50">
-            <tr>
-              <th class="px-6 py-3 text-left text-xs font-semibold text-purple-800 uppercase tracking-wider">Task</th>
-              <th class="px-6 py-3 text-left text-xs font-semibold text-purple-800 uppercase tracking-wider">Description</th>
-              <th class="px-6 py-3 text-left text-xs font-semibold text-purple-800 uppercase tracking-wider">Status</th>
-              <th class="px-6 py-3 text-left text-xs font-semibold text-purple-800 uppercase tracking-wider">Due Date</th>
-              <th class="px-6 py-3 text-right text-xs font-semibold text-purple-800 uppercase tracking-wider">Actions</th>
-            </tr>
-          </thead>
-          <tbody id="taskTableBody" class="divide-y divide-gray-100 bg-white"></tbody>
-        </table>
+  <!-- MAIN -->
+  <main class="main-content min-h-screen" id="mainContent">
+    <header class="bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between md:justify-end shadow-sm">
+      <button id="hamburgerBtn" class="hamburger-btn text-gray-600 hover:text-purple-600 text-2xl">
+        <i class="fas fa-bars"></i>
+      </button>
+      <span class="md:hidden text-lg font-semibold text-purple-700">Project Flow</span>
+      <div></div>
+    </header>
+
+    <div class="p-4 md:p-8">
+      <div class="max-w-5xl mx-auto">
+        <!-- Project Info -->
+        <div class="bg-white rounded-xl shadow-md border border-gray-100 p-6 mb-6">
+          <div class="flex flex-wrap items-start justify-between gap-3">
+            <h1 class="text-2xl md:text-3xl font-bold text-purple-700 flex items-center gap-2">
+              <i class="fas fa-folder-open text-purple-500"></i>
+              <span id="projectNameDisplay">Loading...</span>
+            </h1>
+            <a href="/projects.html" class="text-purple-600 hover:text-purple-800 text-sm flex items-center gap-1">
+              <i class="fas fa-arrow-left"></i> Back to Projects
+            </a>
+          </div>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
+            <div><p class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Description</p><p id="projectDescDisplay" class="text-gray-700 mt-1">—</p></div>
+            <div><p class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Status</p><span id="projectStatusBadge" class="inline-flex px-3 py-1 text-xs font-semibold rounded-full mt-1">Active</span></div>
+            <div><p class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Deadline</p><p id="projectDeadlineDisplay" class="text-gray-700 mt-1">—</p></div>
+          </div>
+          <div class="mt-4">
+            <div class="flex justify-between text-sm font-medium text-gray-600 mb-1"><span>Progress</span><span id="progressPercent">0%</span></div>
+            <div class="w-full h-3 bg-gray-200 rounded-full overflow-hidden"><div id="progressFill" class="h-full bg-purple-600 rounded-full transition-all duration-500" style="width:0%"></div></div>
+          </div>
+        </div>
+
+        <!-- Tasks -->
+        <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
+          <h2 class="text-xl font-semibold text-gray-800 flex items-center gap-2"><i class="fas fa-tasks text-purple-500"></i> Tasks <span id="taskCount" class="text-sm font-normal text-gray-400">(0)</span></h2>
+          <button id="showCreateTaskBtn" class="bg-purple-600 hover:bg-purple-700 text-white font-semibold py-2 px-5 rounded-lg shadow-sm transition flex items-center gap-2 text-sm"><i class="fas fa-plus"></i> Add Task</button>
+        </div>
+
+        <div class="bg-white rounded-xl shadow-md border border-gray-100 overflow-hidden">
+          <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+              <thead class="bg-purple-50"><tr><th class="px-6 py-3 text-left text-xs font-semibold text-purple-800 uppercase tracking-wider">Task</th><th class="px-6 py-3 text-left text-xs font-semibold text-purple-800 uppercase tracking-wider">Description</th><th class="px-6 py-3 text-left text-xs font-semibold text-purple-800 uppercase tracking-wider">Status</th><th class="px-6 py-3 text-left text-xs font-semibold text-purple-800 uppercase tracking-wider">Due Date</th><th class="px-6 py-3 text-right text-xs font-semibold text-purple-800 uppercase tracking-wider">Actions</th></tr></thead>
+              <tbody id="taskTableBody" class="divide-y divide-gray-100 bg-white"></tbody>
+            </table>
+          </div>
+        </div>
       </div>
     </div>
-  </div>
+  </main>
 
-  <!-- ========== CREATE TASK MODAL ========== -->
+  <!-- ===== MODALS (same as before) ===== -->
+  <!-- Create Task Modal -->
   <div id="createTaskModal" class="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 hidden transition-opacity">
     <div class="bg-white rounded-2xl shadow-2xl max-w-lg w-full mx-4 p-6">
-      <div class="flex justify-between items-center mb-5">
-        <h3 class="text-xl font-bold text-purple-700 flex items-center gap-2"><i class="fas fa-plus-circle"></i> New Task</h3>
-        <button id="closeCreateTaskBtn" class="text-gray-400 hover:text-gray-600 text-xl">&times;</button>
-      </div>
+      <div class="flex justify-between items-center mb-5"><h3 class="text-xl font-bold text-purple-700 flex items-center gap-2"><i class="fas fa-plus-circle"></i> New Task</h3><button id="closeCreateTaskBtn" class="text-gray-400 hover:text-gray-600 text-xl">&times;</button></div>
       <div class="space-y-4">
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Task Title</label>
-          <input type="text" id="createTaskTitle" placeholder="e.g. Design homepage" class="w-full px-4 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-purple-400 focus:border-transparent outline-none" />
-        </div>
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Description</label>
-          <input type="text" id="createTaskDesc" placeholder="Optional details" class="w-full px-4 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-purple-400 focus:border-transparent outline-none" />
-        </div>
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Due Date</label>
-          <input type="date" id="createTaskDue" class="w-full px-4 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-purple-400 focus:border-transparent outline-none" />
-        </div>
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Status</label>
-          <select id="createTaskStatus" class="w-full px-4 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-purple-400 focus:border-transparent outline-none bg-white">
-            <option value="Pending">Pending</option>
-            <option value="In Progress">In Progress</option>
-            <option value="Completed">Completed</option>
-          </select>
-        </div>
+        <div><label class="block text-sm font-medium text-gray-700 mb-1">Task Title</label><input type="text" id="createTaskTitle" placeholder="e.g. Design homepage" class="w-full px-4 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-purple-400 focus:border-transparent outline-none" /></div>
+        <div><label class="block text-sm font-medium text-gray-700 mb-1">Description</label><input type="text" id="createTaskDesc" placeholder="Optional details" class="w-full px-4 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-purple-400 focus:border-transparent outline-none" /></div>
+        <div><label class="block text-sm font-medium text-gray-700 mb-1">Due Date</label><input type="date" id="createTaskDue" class="w-full px-4 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-purple-400 focus:border-transparent outline-none" /></div>
+        <div><label class="block text-sm font-medium text-gray-700 mb-1">Status</label><select id="createTaskStatus" class="w-full px-4 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-purple-400 focus:border-transparent outline-none bg-white"><option value="Pending">Pending</option><option value="In Progress">In Progress</option><option value="Completed">Completed</option></select></div>
       </div>
-      <div class="flex justify-end gap-3 mt-6">
-        <button id="cancelCreateTaskBtn" class="px-5 py-2.5 border border-gray-200 rounded-lg text-gray-600 hover:bg-gray-50 transition">Cancel</button>
-        <button id="saveCreateTaskBtn" class="px-6 py-2.5 bg-purple-600 hover:bg-purple-700 text-white font-semibold rounded-lg shadow-sm transition flex items-center gap-2"><i class="fas fa-check"></i> Create Task</button>
-      </div>
+      <div class="flex justify-end gap-3 mt-6"><button id="cancelCreateTaskBtn" class="px-5 py-2.5 border border-gray-200 rounded-lg text-gray-600 hover:bg-gray-50 transition">Cancel</button><button id="saveCreateTaskBtn" class="px-6 py-2.5 bg-purple-600 hover:bg-purple-700 text-white font-semibold rounded-lg shadow-sm transition flex items-center gap-2"><i class="fas fa-check"></i> Create Task</button></div>
     </div>
   </div>
 
-  <!-- ========== EDIT TASK MODAL ========== -->
+  <!-- Edit Task Modal -->
   <div id="editTaskModal" class="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 hidden transition-opacity">
     <div class="bg-white rounded-2xl shadow-2xl max-w-lg w-full mx-4 p-6">
-      <div class="flex justify-between items-center mb-5">
-        <h3 class="text-xl font-bold text-purple-700 flex items-center gap-2"><i class="fas fa-pen"></i> Edit Task</h3>
-        <button id="closeEditTaskBtn" class="text-gray-400 hover:text-gray-600 text-xl">&times;</button>
-      </div>
+      <div class="flex justify-between items-center mb-5"><h3 class="text-xl font-bold text-purple-700 flex items-center gap-2"><i class="fas fa-pen"></i> Edit Task</h3><button id="closeEditTaskBtn" class="text-gray-400 hover:text-gray-600 text-xl">&times;</button></div>
       <input type="hidden" id="editTaskId" />
       <div class="space-y-4">
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Task Title</label>
-          <input type="text" id="editTaskTitle" class="w-full px-4 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-purple-400 focus:border-transparent outline-none" />
-        </div>
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Description</label>
-          <input type="text" id="editTaskDesc" class="w-full px-4 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-purple-400 focus:border-transparent outline-none" />
-        </div>
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Due Date</label>
-          <input type="date" id="editTaskDue" class="w-full px-4 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-purple-400 focus:border-transparent outline-none" />
-        </div>
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Status</label>
-          <select id="editTaskStatus" class="w-full px-4 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-purple-400 focus:border-transparent outline-none bg-white">
-            <option value="Pending">Pending</option>
-            <option value="In Progress">In Progress</option>
-            <option value="Completed">Completed</option>
-          </select>
-        </div>
+        <div><label class="block text-sm font-medium text-gray-700 mb-1">Task Title</label><input type="text" id="editTaskTitle" class="w-full px-4 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-purple-400 focus:border-transparent outline-none" /></div>
+        <div><label class="block text-sm font-medium text-gray-700 mb-1">Description</label><input type="text" id="editTaskDesc" class="w-full px-4 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-purple-400 focus:border-transparent outline-none" /></div>
+        <div><label class="block text-sm font-medium text-gray-700 mb-1">Due Date</label><input type="date" id="editTaskDue" class="w-full px-4 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-purple-400 focus:border-transparent outline-none" /></div>
+        <div><label class="block text-sm font-medium text-gray-700 mb-1">Status</label><select id="editTaskStatus" class="w-full px-4 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-purple-400 focus:border-transparent outline-none bg-white"><option value="Pending">Pending</option><option value="In Progress">In Progress</option><option value="Completed">Completed</option></select></div>
       </div>
-      <div class="flex justify-end gap-3 mt-6">
-        <button id="cancelEditTaskBtn" class="px-5 py-2.5 border border-gray-200 rounded-lg text-gray-600 hover:bg-gray-50 transition">Cancel</button>
-        <button id="saveEditTaskBtn" class="px-6 py-2.5 bg-purple-600 hover:bg-purple-700 text-white font-semibold rounded-lg shadow-sm transition flex items-center gap-2"><i class="fas fa-save"></i> Update Task</button>
-      </div>
+      <div class="flex justify-end gap-3 mt-6"><button id="cancelEditTaskBtn" class="px-5 py-2.5 border border-gray-200 rounded-lg text-gray-600 hover:bg-gray-50 transition">Cancel</button><button id="saveEditTaskBtn" class="px-6 py-2.5 bg-purple-600 hover:bg-purple-700 text-white font-semibold rounded-lg shadow-sm transition flex items-center gap-2"><i class="fas fa-save"></i> Update Task</button></div>
     </div>
   </div>
 
   <script type="module">
     import { supabase } from '../js/supabase.js';
 
-    // ---- AUTH GUARD ----
     const { data: { user } } = await supabase.auth.getUser();
-    if (!user) {
-      window.location.href = '/index.html';
-      throw new Error('Redirecting...');
-    }
-    document.getElementById('userEmail').textContent = user.email;
+    if (!user) { window.location.href = '/index.html'; throw new Error('Redirect'); }
+    document.getElementById('sidebarUserEmail').textContent = user.email;
 
-    // ---- LOGOUT ----
-    document.getElementById('logoutBtn').addEventListener('click', async () => {
+    // ---- Sidebar collapse (same as others) ----
+    const sidebar = document.getElementById('mainSidebar');
+    const mainContent = document.getElementById('mainContent');
+    const toggleBtn = document.getElementById('sidebarToggleBtn');
+    const toggleIcon = toggleBtn.querySelector('i');
+    const toggleLabel = toggleBtn.querySelector('.toggle-label');
+    const isCollapsed = localStorage.getItem('sidebarCollapsed') === 'true';
+    if (isCollapsed) {
+      sidebar.classList.add('collapsed');
+      mainContent.classList.add('shifted');
+      toggleIcon.className = 'fas fa-chevron-right';
+      toggleLabel.textContent = 'Expand';
+    }
+    toggleBtn.addEventListener('click', () => {
+      const collapsed = sidebar.classList.toggle('collapsed');
+      mainContent.classList.toggle('shifted');
+      if (collapsed) {
+        toggleIcon.className = 'fas fa-chevron-right';
+        toggleLabel.textContent = 'Expand';
+        localStorage.setItem('sidebarCollapsed', 'true');
+      } else {
+        toggleIcon.className = 'fas fa-chevron-left';
+        toggleLabel.textContent = 'Collapse';
+        localStorage.setItem('sidebarCollapsed', 'false');
+      }
+    });
+
+    // Mobile toggle
+    const hamburger = document.getElementById('hamburgerBtn');
+    const overlay = document.getElementById('sidebarOverlay');
+    function openSidebar() { sidebar.classList.add('open'); overlay.classList.add('open'); }
+    function closeSidebar() { sidebar.classList.remove('open'); overlay.classList.remove('open'); }
+    hamburger.addEventListener('click', () => { if (sidebar.classList.contains('open')) closeSidebar(); else openSidebar(); });
+    overlay.addEventListener('click', closeSidebar);
+
+    document.getElementById('sidebarLogoutBtn').addEventListener('click', async () => {
       await supabase.auth.signOut();
       window.location.href = '/index.html';
     });
 
-    // ---- Get Project ID from URL ----
+    // ---- Project details logic (same as before) ----
     const urlParams = new URLSearchParams(window.location.search);
     const projectId = urlParams.get('id');
-    if (!projectId) {
-      alert('No project ID specified.');
-      window.location.href = '/project.html';
-      throw new Error('No project ID');
-    }
+    if (!projectId) { alert('No project ID'); window.location.href = '/projects.html'; throw new Error('No ID'); }
 
-    // ---- DOM refs ----
     const projectNameDisplay = document.getElementById('projectNameDisplay');
     const projectDescDisplay = document.getElementById('projectDescDisplay');
     const projectStatusBadge = document.getElementById('projectStatusBadge');
     const projectDeadlineDisplay = document.getElementById('projectDeadlineDisplay');
     const progressFill = document.getElementById('progressFill');
     const progressPercent = document.getElementById('progressPercent');
-
     const taskTbody = document.getElementById('taskTableBody');
     const taskCount = document.getElementById('taskCount');
 
-    // ---- Helpers ----
-    function statusBadgeClass(status) {
-      const map = {
-        'Active': 'bg-purple-100 text-purple-800',
-        'On Hold': 'bg-yellow-100 text-yellow-800',
-        'Completed': 'bg-green-100 text-green-800',
-        'Archived': 'bg-gray-100 text-gray-800',
-      };
-      return map[status] || 'bg-gray-100 text-gray-800';
-    }
+    function statusBadgeClass(s) { const map = { 'Active':'bg-purple-100 text-purple-800','On Hold':'bg-yellow-100 text-yellow-800','Completed':'bg-green-100 text-green-800','Archived':'bg-gray-100 text-gray-800' }; return map[s] || 'bg-gray-100 text-gray-800'; }
+    function taskStatusBadge(s) { const map = { 'Pending':'bg-yellow-100 text-yellow-800','In Progress':'bg-blue-100 text-blue-800','Completed':'bg-green-100 text-green-800' }; return map[s] || 'bg-gray-100 text-gray-800'; }
+    function escapeHtml(t) { if (!t) return ''; const d = document.createElement('div'); d.textContent = t; return d.innerHTML; }
+    function openModal(m) { m.classList.remove('hidden'); m.classList.add('flex'); }
+    function closeModal(m) { m.classList.add('hidden'); m.classList.remove('flex'); }
 
-    function taskStatusBadge(status) {
-      const map = {
-        'Pending': 'bg-yellow-100 text-yellow-800',
-        'In Progress': 'bg-blue-100 text-blue-800',
-        'Completed': 'bg-green-100 text-green-800',
-      };
-      return map[status] || 'bg-gray-100 text-gray-800';
-    }
-
-    function escapeHtml(text) {
-      if (!text) return '';
-      const div = document.createElement('div');
-      div.textContent = text;
-      return div.innerHTML;
-    }
-
-    function openModal(modal) { modal.classList.remove('hidden'); modal.classList.add('flex'); }
-    function closeModal(modal) { modal.classList.add('hidden'); modal.classList.remove('flex'); }
-
-    // ---- Update Project Progress ----
     async function updateProjectProgress(projId) {
-      // Count total tasks and completed tasks for this project
-      const { data: tasks, error } = await supabase
-        .from('tasks')
-        .select('status')
-        .eq('project_id', projId);
-
-      if (error) {
-        console.error('Error counting tasks:', error);
-        return;
-      }
-
-      const total = tasks.length;
-      const completed = tasks.filter(t => t.status === 'Completed').length;
+      const { data: tasks, error } = await supabase.from('tasks').select('status').eq('project_id', projId);
+      if (error) { console.error(error); return; }
+      const total = tasks.length, completed = tasks.filter(t => t.status === 'Completed').length;
       const progress = total === 0 ? 0 : Math.round((completed / total) * 100);
-
-      // Update the project's progress field
-      const { error: updateError } = await supabase
-        .from('projects')
-        .update({ progress })
-        .eq('id', projId)
-        .eq('user_id', user.id);
-
-      if (updateError) {
-        console.error('Error updating progress:', updateError);
-        return;
-      }
-
-      // Update UI
+      await supabase.from('projects').update({ progress }).eq('id', projId).eq('user_id', user.id);
       progressFill.style.width = progress + '%';
       progressPercent.textContent = progress + '%';
       return progress;
     }
 
-    // ---- Load Project Info ----
     async function loadProjectInfo() {
-      const { data, error } = await supabase
-        .from('projects')
-        .select('*')
-        .eq('id', projectId)
-        .eq('user_id', user.id)
-        .single();
-
-      if (error || !data) {
-        alert('Project not found or you do not have access.');
-        window.location.href = '/projects.html';
-        return;
-      }
-
+      const { data, error } = await supabase.from('projects').select('*').eq('id', projectId).eq('user_id', user.id).single();
+      if (error || !data) { alert('Project not found.'); window.location.href = '/projects.html'; return; }
       projectNameDisplay.textContent = data.name;
       projectDescDisplay.textContent = data.description || '—';
       projectStatusBadge.textContent = data.status || 'Active';
       projectStatusBadge.className = `inline-flex px-3 py-1 text-xs font-semibold rounded-full mt-1 ${statusBadgeClass(data.status)}`;
       projectDeadlineDisplay.textContent = data.deadline ? new Date(data.deadline).toLocaleDateString() : '—';
-
-      // Set progress bar
       progressFill.style.width = (data.progress || 0) + '%';
       progressPercent.textContent = (data.progress || 0) + '%';
+      const container = document.getElementById('navDetailsContainer');
+      container.classList.remove('hidden');
+      document.getElementById('navDetailsLink').href = `/project-details.html?id=${projectId}`;
     }
 
-    // ---- Load Tasks ----
     async function loadTasks() {
-      const { data, error } = await supabase
-        .from('tasks')
-        .select('*')
-        .eq('project_id', projectId)
-        .order('created_at', { ascending: false });
-
-      if (error) {
-        console.error('Error loading tasks:', error);
-        taskTbody.innerHTML = `<tr><td colspan="5" class="text-center py-8 text-red-500">Failed to load tasks.</td></tr>`;
-        return;
-      }
-
+      const { data, error } = await supabase.from('tasks').select('*').eq('project_id', projectId).order('created_at', { ascending: false });
+      if (error) { taskTbody.innerHTML = `<tr><td colspan="5" class="text-center py-8 text-red-500">Failed.</td></tr>`; return; }
       taskCount.textContent = `(${data?.length || 0})`;
-
-      if (!data || data.length === 0) {
-        taskTbody.innerHTML = `<tr><td colspan="5" class="text-center py-10 text-gray-400"><i class="fas fa-clipboard-list text-3xl block mb-2"></i>No tasks yet. Add your first task!</td></tr>`;
-        return;
-      }
-
+      if (!data || data.length === 0) { taskTbody.innerHTML = `<tr><td colspan="5" class="text-center py-10 text-gray-400"><i class="fas fa-clipboard-list text-3xl block mb-2"></i>No tasks yet.</td></tr>`; return; }
       taskTbody.innerHTML = data.map(t => `
         <tr class="hover:bg-purple-50/50 transition">
           <td class="px-6 py-4 font-medium text-gray-800">${escapeHtml(t.title)}</td>
@@ -318,62 +329,30 @@
           <td class="px-6 py-4"><span class="inline-flex px-3 py-1 text-xs font-semibold rounded-full ${taskStatusBadge(t.status)}">${t.status || 'Pending'}</span></td>
           <td class="px-6 py-4 text-sm text-gray-500">${t.due_date ? new Date(t.due_date).toLocaleDateString() : '—'}</td>
           <td class="px-6 py-4 text-right space-x-1">
-            <button class="edit-task-btn text-purple-600 hover:text-purple-800 transition px-2 py-1 rounded" data-id="${t.id}" title="Edit"><i class="fas fa-edit"></i></button>
-            <button class="delete-task-btn text-red-500 hover:text-red-700 transition px-2 py-1 rounded" data-id="${t.id}" title="Delete"><i class="fas fa-trash-alt"></i></button>
+            <button class="edit-task-btn text-purple-600 hover:text-purple-800 transition px-2 py-1 rounded" data-id="${t.id}"><i class="fas fa-edit"></i></button>
+            <button class="delete-task-btn text-red-500 hover:text-red-700 transition px-2 py-1 rounded" data-id="${t.id}"><i class="fas fa-trash-alt"></i></button>
           </td>
         </tr>
       `).join('');
-
-      document.querySelectorAll('.edit-task-btn').forEach(btn =>
-        btn.addEventListener('click', () => openEditTaskModal(btn.dataset.id))
-      );
-      document.querySelectorAll('.delete-task-btn').forEach(btn =>
-        btn.addEventListener('click', () => deleteTask(btn.dataset.id))
-      );
+      document.querySelectorAll('.edit-task-btn').forEach(b => b.addEventListener('click', () => openEditTaskModal(b.dataset.id)));
+      document.querySelectorAll('.delete-task-btn').forEach(b => b.addEventListener('click', () => deleteTask(b.dataset.id)));
     }
 
-    // ---- Refresh Everything ----
-    async function refreshAll() {
-      await loadProjectInfo();
-      await loadTasks();
-      // Recalculate progress after tasks load
-      await updateProjectProgress(projectId);
-    }
+    async function refreshAll() { await loadProjectInfo(); await loadTasks(); await updateProjectProgress(projectId); }
 
-    // ---- CREATE TASK ----
+    // Task CRUD
     async function createTask() {
       const title = document.getElementById('createTaskTitle').value.trim();
-      if (!title) return alert('Task title is required.');
-
-      const { error } = await supabase.from('tasks').insert([{
-        project_id: projectId,
-        title,
-        description: document.getElementById('createTaskDesc').value.trim() || null,
-        due_date: document.getElementById('createTaskDue').value || null,
-        status: document.getElementById('createTaskStatus').value || 'Pending',
-      }]);
-
-      if (error) { console.error(error); alert('Failed to create task.'); return; }
-
-      // Reset & close
-      document.getElementById('createTaskTitle').value = '';
-      document.getElementById('createTaskDesc').value = '';
-      document.getElementById('createTaskDue').value = '';
-      document.getElementById('createTaskStatus').value = 'Pending';
-      closeModal(document.getElementById('createTaskModal'));
-      refreshAll();
+      if (!title) return alert('Title required.');
+      const { error } = await supabase.from('tasks').insert([{ project_id: projectId, title, description: document.getElementById('createTaskDesc').value.trim() || null, due_date: document.getElementById('createTaskDue').value || null, status: document.getElementById('createTaskStatus').value || 'Pending' }]);
+      if (error) { alert('Failed.'); return; }
+      document.getElementById('createTaskTitle').value = ''; document.getElementById('createTaskDesc').value = ''; document.getElementById('createTaskDue').value = ''; document.getElementById('createTaskStatus').value = 'Pending';
+      closeModal(document.getElementById('createTaskModal')); refreshAll();
     }
 
-    // ---- EDIT TASK ----
     async function openEditTaskModal(id) {
-      const { data, error } = await supabase
-        .from('tasks')
-        .select('*')
-        .eq('id', id)
-        .single();
-
-      if (error || !data) { alert('Task not found.'); return; }
-
+      const { data, error } = await supabase.from('tasks').select('*').eq('id', id).single();
+      if (error || !data) { alert('Not found.'); return; }
       document.getElementById('editTaskId').value = data.id;
       document.getElementById('editTaskTitle').value = data.title || '';
       document.getElementById('editTaskDesc').value = data.description || '';
@@ -381,51 +360,29 @@
       document.getElementById('editTaskStatus').value = data.status || 'Pending';
       openModal(document.getElementById('editTaskModal'));
     }
-
     async function saveEditTask() {
       const id = document.getElementById('editTaskId').value;
-      const updated = {
-        title: document.getElementById('editTaskTitle').value.trim(),
-        description: document.getElementById('editTaskDesc').value.trim() || null,
-        due_date: document.getElementById('editTaskDue').value || null,
-        status: document.getElementById('editTaskStatus').value,
-      };
-      if (!updated.title) return alert('Task title is required.');
-
-      const { error } = await supabase
-        .from('tasks')
-        .update(updated)
-        .eq('id', id);
-
-      if (error) { alert('Failed to update task.'); return; }
-
-      closeModal(document.getElementById('editTaskModal'));
-      refreshAll();
+      const updated = { title: document.getElementById('editTaskTitle').value.trim(), description: document.getElementById('editTaskDesc').value.trim() || null, due_date: document.getElementById('editTaskDue').value || null, status: document.getElementById('editTaskStatus').value };
+      if (!updated.title) return alert('Title required.');
+      const { error } = await supabase.from('tasks').update(updated).eq('id', id);
+      if (error) { alert('Failed.'); return; }
+      closeModal(document.getElementById('editTaskModal')); refreshAll();
     }
 
-    // ---- DELETE TASK ----
-    async function deleteTask(id) {
-      if (!confirm('Delete this task?')) return;
-      const { error } = await supabase.from('tasks').delete().eq('id', id);
-      if (error) { alert('Failed to delete task.'); return; }
-      refreshAll();
-    }
+    async function deleteTask(id) { if (!confirm('Delete?')) return; const { error } = await supabase.from('tasks').delete().eq('id', id); if (error) alert('Failed.'); else refreshAll(); }
 
-    // ---- Modal Event Listeners ----
-    // Create Task
+    // Modal listeners
     document.getElementById('showCreateTaskBtn').addEventListener('click', () => openModal(document.getElementById('createTaskModal')));
     document.getElementById('closeCreateTaskBtn').addEventListener('click', () => closeModal(document.getElementById('createTaskModal')));
     document.getElementById('cancelCreateTaskBtn').addEventListener('click', () => closeModal(document.getElementById('createTaskModal')));
     document.getElementById('saveCreateTaskBtn').addEventListener('click', createTask);
     document.getElementById('createTaskModal').addEventListener('click', (e) => { if (e.target === e.currentTarget) closeModal(e.currentTarget); });
 
-    // Edit Task
     document.getElementById('closeEditTaskBtn').addEventListener('click', () => closeModal(document.getElementById('editTaskModal')));
     document.getElementById('cancelEditTaskBtn').addEventListener('click', () => closeModal(document.getElementById('editTaskModal')));
     document.getElementById('saveEditTaskBtn').addEventListener('click', saveEditTask);
     document.getElementById('editTaskModal').addEventListener('click', (e) => { if (e.target === e.currentTarget) closeModal(e.currentTarget); });
 
-    // ---- Initial Load ----
     refreshAll();
   </script>
 </body>

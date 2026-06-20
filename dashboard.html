@@ -7,293 +7,302 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+  <style>
+    /* ---- Same sidebar styles as projects.html ---- */
+    .sidebar {
+      width: 240px;
+      transition: width 0.3s ease-in-out;
+      z-index: 40;
+      background: white;
+      border-right: 1px solid #e5e7eb;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+      display: flex;
+      flex-direction: column;
+      position: fixed;
+      top: 0;
+      left: 0;
+      height: 100vh;
+    }
+    .sidebar.collapsed {
+      width: 64px;
+    }
+    .sidebar.collapsed .nav-link span,
+    .sidebar.collapsed .logo-text,
+    .sidebar.collapsed .user-email-text {
+      display: none;
+    }
+    .sidebar.collapsed .nav-link {
+      justify-content: center;
+    }
+    .sidebar.collapsed .nav-link i {
+      margin-right: 0;
+    }
+    .sidebar.collapsed .user-info {
+      justify-content: center;
+    }
+    .sidebar.collapsed .toggle-btn i {
+      transform: rotate(180deg);
+    }
+    .main-content {
+      margin-left: 240px;
+      transition: margin-left 0.3s ease-in-out;
+    }
+    .main-content.shifted {
+      margin-left: 64px;
+    }
+    .sidebar-overlay {
+      z-index: 30;
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.3);
+    }
+    .sidebar-overlay.open {
+      display: block;
+    }
+    @media (max-width: 767px) {
+      .sidebar {
+        transform: translateX(-100%);
+        width: 240px !important;
+      }
+      .sidebar.open {
+        transform: translateX(0);
+      }
+      .main-content {
+        margin-left: 0 !important;
+      }
+      .hamburger-btn {
+        display: block !important;
+      }
+      .sidebar .toggle-btn {
+        display: none;
+      }
+    }
+    @media (min-width: 768px) {
+      .hamburger-btn {
+        display: none !important;
+      }
+      .sidebar .toggle-btn {
+        display: flex;
+      }
+    }
+    .nav-link {
+      transition: background 0.15s, color 0.15s;
+    }
+    .nav-link.active {
+      background: #7C3AED;
+      color: white;
+    }
+    .nav-link.active i {
+      color: white;
+    }
+  </style>
 </head>
-<body class="bg-gray-50 font-sans antialiased p-4 md:p-8">
+<body>
 
-  <div class="max-w-7xl mx-auto">
-
-    <!-- Header -->
-    <div class="flex flex-wrap items-center justify-between gap-4 mb-6">
-      <h1 class="text-3xl font-bold text-purple-700 flex items-center gap-2">
-        <i class="fas fa-chart-pie text-purple-500"></i> Dashboard
-      </h1>
-      <div class="flex flex-wrap items-center gap-3">
-        <a href="/project.html" class="bg-white hover:bg-gray-50 text-purple-600 border border-purple-200 font-medium py-2 px-4 rounded-lg shadow-sm transition flex items-center gap-2 text-sm">
-          <i class="fas fa-project-diagram"></i> My Projects
-        </a>
-        <span class="text-sm text-gray-600 bg-white px-3 py-1.5 rounded-full shadow-sm border border-gray-200">
-          <i class="fas fa-user-circle text-purple-500 mr-1"></i> <span id="userEmail">Loading...</span>
-        </span>
-        <button id="logoutBtn" class="bg-white hover:bg-gray-100 text-gray-700 border border-gray-200 font-medium py-2 px-4 rounded-lg shadow-sm transition flex items-center gap-2 text-sm">
-          <i class="fas fa-sign-out-alt text-purple-500"></i> Logout
-        </button>
-      </div>
+  <!-- ===== SIDEBAR (exactly same as projects) ===== -->
+  <aside class="sidebar" id="mainSidebar">
+    <div class="px-4 py-5 border-b border-gray-100 flex items-center gap-2">
+      <i class="fas fa-project-diagram text-purple-600 text-xl"></i>
+      <span class="logo-text text-xl font-bold text-purple-700">Project Flow</span>
     </div>
-
-    <!-- Stats Cards -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-      <div class="bg-white rounded-xl shadow-sm p-5 border-l-4 border-purple-500">
-        <div class="flex items-center justify-between">
-          <div>
-            <p class="text-sm text-gray-500">Total Projects</p>
-            <p class="text-2xl font-bold text-purple-700" id="totalProjects">0</p>
-          </div>
-          <i class="fas fa-folder-open text-3xl text-purple-300"></i>
-        </div>
+    <nav class="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
+      <a href="/dashboard.html" class="nav-link active flex items-center gap-3 px-3 py-2.5 rounded-lg transition">
+        <i class="fas fa-chart-pie w-5"></i>
+        <span>Dashboard</span>
+      </a>
+      <a href="/projects.html" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-600 hover:bg-purple-50 hover:text-purple-700 transition">
+        <i class="fas fa-folder-open w-5 text-purple-400"></i>
+        <span>Projects</span>
+      </a>
+    </nav>
+    <div class="border-t border-gray-100 p-4 space-y-3">
+      <div class="user-info flex items-center gap-2 text-sm text-gray-600 truncate">
+        <i class="fas fa-user-circle text-purple-500"></i>
+        <span class="user-email-text truncate" id="sidebarUserEmail">user@example.com</span>
       </div>
-      <div class="bg-white rounded-xl shadow-sm p-5 border-l-4 border-blue-500">
-        <div class="flex items-center justify-between">
-          <div>
-            <p class="text-sm text-gray-500">Total Tasks</p>
-            <p class="text-2xl font-bold text-blue-600" id="totalTasks">0</p>
-          </div>
-          <i class="fas fa-tasks text-3xl text-blue-300"></i>
-        </div>
-      </div>
-      <div class="bg-white rounded-xl shadow-sm p-5 border-l-4 border-green-500">
-        <div class="flex items-center justify-between">
-          <div>
-            <p class="text-sm text-gray-500">Completed Tasks</p>
-            <p class="text-2xl font-bold text-green-600" id="completedTasks">0</p>
-          </div>
-          <i class="fas fa-check-circle text-3xl text-green-300"></i>
-        </div>
-      </div>
-      <div class="bg-white rounded-xl shadow-sm p-5 border-l-4 border-yellow-500">
-        <div class="flex items-center justify-between">
-          <div>
-            <p class="text-sm text-gray-500">Upcoming Deadlines</p>
-            <p class="text-2xl font-bold text-yellow-600" id="upcomingDeadlines">0</p>
-          </div>
-          <i class="fas fa-calendar-alt text-3xl text-yellow-300"></i>
-        </div>
-      </div>
+      <button id="sidebarToggleBtn" class="toggle-btn w-full flex items-center justify-center gap-2 px-3 py-2 text-sm text-gray-500 hover:bg-purple-50 hover:text-purple-600 rounded-lg transition">
+        <i class="fas fa-chevron-left"></i>
+        <span class="toggle-label">Collapse</span>
+      </button>
+      <button id="sidebarLogoutBtn" class="w-full flex items-center gap-2 px-3 py-2 text-sm text-gray-600 hover:bg-red-50 hover:text-red-600 rounded-lg transition">
+        <i class="fas fa-sign-out-alt"></i>
+        <span>Logout</span>
+      </button>
     </div>
+  </aside>
+  <div id="sidebarOverlay" class="sidebar-overlay" onclick="closeSidebar()"></div>
 
-    <!-- Charts Row -->
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-      <div class="bg-white rounded-xl shadow-md border border-gray-100 p-6">
-        <h3 class="text-lg font-semibold text-gray-700 mb-4 flex items-center gap-2">
-          <i class="fas fa-chart-pie text-purple-500"></i> Projects by Status
-        </h3>
-        <div class="relative" style="height: 250px;">
-          <canvas id="projectStatusChart"></canvas>
-        </div>
-      </div>
-      <div class="bg-white rounded-xl shadow-md border border-gray-100 p-6">
-        <h3 class="text-lg font-semibold text-gray-700 mb-4 flex items-center gap-2">
-          <i class="fas fa-chart-pie text-blue-500"></i> Tasks by Status
-        </h3>
-        <div class="relative" style="height: 250px;">
-          <canvas id="taskStatusChart"></canvas>
-        </div>
-      </div>
+  <!-- ===== MAIN ===== -->
+  <main class="main-content min-h-screen" id="mainContent">
+    <header class="bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between md:justify-end shadow-sm">
+      <button id="hamburgerBtn" class="hamburger-btn text-gray-600 hover:text-purple-600 text-2xl">
+        <i class="fas fa-bars"></i>
+      </button>
+      <span class="md:hidden text-lg font-semibold text-purple-700">Project Flow</span>
+      <div></div>
+    </header>
+
+    <div class="p-4 md:p-8">
+      <div class="max-w-7xl mx-auto">
+        <h1 class="text-3xl font-bold text-purple-700 flex items-center gap-2 mb-6">
+          <i class="fas fa-chart-pie text-purple-500"></i> Dashboard
+        </h1>
+
+        <!-- Stats -->
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-6">
+  <!-- Total Projects -->
+  <div class="group bg-gradient-to-br from-white to-purple-50 rounded-2xl shadow-sm hover:shadow-md hover:-translate-y-1 transition-all duration-300 p-5 flex items-center gap-4 border border-purple-100">
+    <div class="w-12 h-12 rounded-xl bg-purple-100 flex items-center justify-center text-purple-600 text-xl group-hover:scale-110 transition-transform">
+      <i class="fas fa-folder-open"></i>
     </div>
-
-    <!-- Upcoming Deadlines Table -->
-    <div class="bg-white rounded-xl shadow-md border border-gray-100 overflow-hidden">
-      <div class="px-6 py-4 border-b border-gray-100">
-        <h3 class="text-lg font-semibold text-gray-700 flex items-center gap-2">
-          <i class="fas fa-clock text-yellow-500"></i> Upcoming Deadlines (next 7 days)
-        </h3>
-      </div>
-      <div class="overflow-x-auto">
-        <table class="min-w-full divide-y divide-gray-200">
-          <thead class="bg-purple-50">
-            <tr>
-              <th class="px-6 py-3 text-left text-xs font-semibold text-purple-800 uppercase tracking-wider">Project</th>
-              <th class="px-6 py-3 text-left text-xs font-semibold text-purple-800 uppercase tracking-wider">Deadline</th>
-              <th class="px-6 py-3 text-left text-xs font-semibold text-purple-800 uppercase tracking-wider">Status</th>
-              <th class="px-6 py-3 text-left text-xs font-semibold text-purple-800 uppercase tracking-wider">Progress</th>
-            </tr>
-          </thead>
-          <tbody id="deadlineTableBody" class="divide-y divide-gray-100 bg-white">
-            <tr><td colspan="4" class="text-center py-8 text-gray-400">No upcoming deadlines.</td></tr>
-          </tbody>
-        </table>
-      </div>
+    <div>
+      <p class="text-xs font-semibold text-purple-600 uppercase tracking-wider">Total Projects</p>
+      <p class="text-3xl font-bold text-gray-800" id="totalProjects">0</p>
     </div>
-
   </div>
+
+  <!-- Total Tasks -->
+  <div class="group bg-gradient-to-br from-white to-blue-50 rounded-2xl shadow-sm hover:shadow-md hover:-translate-y-1 transition-all duration-300 p-5 flex items-center gap-4 border border-blue-100">
+    <div class="w-12 h-12 rounded-xl bg-blue-100 flex items-center justify-center text-blue-600 text-xl group-hover:scale-110 transition-transform">
+      <i class="fas fa-tasks"></i>
+    </div>
+    <div>
+      <p class="text-xs font-semibold text-blue-600 uppercase tracking-wider">Total Tasks</p>
+      <p class="text-3xl font-bold text-gray-800" id="totalTasks">0</p>
+    </div>
+  </div>
+
+  <!-- Completed Tasks -->
+  <div class="group bg-gradient-to-br from-white to-green-50 rounded-2xl shadow-sm hover:shadow-md hover:-translate-y-1 transition-all duration-300 p-5 flex items-center gap-4 border border-green-100">
+    <div class="w-12 h-12 rounded-xl bg-green-100 flex items-center justify-center text-green-600 text-xl group-hover:scale-110 transition-transform">
+      <i class="fas fa-check-double"></i>
+    </div>
+    <div>
+      <p class="text-xs font-semibold text-green-600 uppercase tracking-wider">Completed Tasks</p>
+      <p class="text-3xl font-bold text-gray-800" id="completedTasks">0</p>
+    </div>
+  </div>
+
+  <!-- Upcoming Deadlines -->
+  <div class="group bg-gradient-to-br from-white to-yellow-50 rounded-2xl shadow-sm hover:shadow-md hover:-translate-y-1 transition-all duration-300 p-5 flex items-center gap-4 border border-yellow-100">
+    <div class="w-12 h-12 rounded-xl bg-yellow-100 flex items-center justify-center text-yellow-600 text-xl group-hover:scale-110 transition-transform">
+      <i class="fas fa-calendar-alt"></i>
+    </div>
+    <div>
+      <p class="text-xs font-semibold text-yellow-600 uppercase tracking-wider">Upcoming Deadlines</p>
+      <p class="text-3xl font-bold text-gray-800" id="upcomingDeadlines">0</p>
+    </div>
+  </div>
+</div>
+
+        <!-- Charts -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+          <div class="bg-white rounded-xl shadow-md border border-gray-100 p-6">
+            <h3 class="text-lg font-semibold text-gray-700 mb-4 flex items-center gap-2"><i class="fas fa-chart-pie text-purple-500"></i> Projects by Status</h3>
+            <div class="relative" style="height:250px;"><canvas id="projectStatusChart"></canvas></div>
+          </div>
+          <div class="bg-white rounded-xl shadow-md border border-gray-100 p-6">
+            <h3 class="text-lg font-semibold text-gray-700 mb-4 flex items-center gap-2"><i class="fas fa-chart-pie text-blue-500"></i> Tasks by Status</h3>
+            <div class="relative" style="height:250px;"><canvas id="taskStatusChart"></canvas></div>
+          </div>
+        </div>
+
+
+      </div>
+    </div>
+  </main>
 
   <script type="module">
     import { supabase } from '../js/supabase.js';
 
-    // ---- AUTH GUARD ----
     const { data: { user } } = await supabase.auth.getUser();
-    if (!user) {
-      window.location.href = '/index.html';
-      throw new Error('Redirecting to login...');
-    }
-    document.getElementById('userEmail').textContent = user.email;
+    if (!user) { window.location.href = '/index.html'; throw new Error('Redirect'); }
+    document.getElementById('sidebarUserEmail').textContent = user.email;
 
-    // ---- LOGOUT ----
-    document.getElementById('logoutBtn').addEventListener('click', async () => {
+    // ---- Sidebar collapse logic (same as projects) ----
+    const sidebar = document.getElementById('mainSidebar');
+    const mainContent = document.getElementById('mainContent');
+    const toggleBtn = document.getElementById('sidebarToggleBtn');
+    const toggleIcon = toggleBtn.querySelector('i');
+    const toggleLabel = toggleBtn.querySelector('.toggle-label');
+    const isCollapsed = localStorage.getItem('sidebarCollapsed') === 'true';
+    if (isCollapsed) {
+      sidebar.classList.add('collapsed');
+      mainContent.classList.add('shifted');
+      toggleIcon.className = 'fas fa-chevron-right';
+      toggleLabel.textContent = 'Expand';
+    }
+    toggleBtn.addEventListener('click', () => {
+      const collapsed = sidebar.classList.toggle('collapsed');
+      mainContent.classList.toggle('shifted');
+      if (collapsed) {
+        toggleIcon.className = 'fas fa-chevron-right';
+        toggleLabel.textContent = 'Expand';
+        localStorage.setItem('sidebarCollapsed', 'true');
+      } else {
+        toggleIcon.className = 'fas fa-chevron-left';
+        toggleLabel.textContent = 'Collapse';
+        localStorage.setItem('sidebarCollapsed', 'false');
+      }
+    });
+
+    // Mobile toggle
+    const hamburger = document.getElementById('hamburgerBtn');
+    const overlay = document.getElementById('sidebarOverlay');
+    function openSidebar() { sidebar.classList.add('open'); overlay.classList.add('open'); }
+    function closeSidebar() { sidebar.classList.remove('open'); overlay.classList.remove('open'); }
+    hamburger.addEventListener('click', () => { if (sidebar.classList.contains('open')) closeSidebar(); else openSidebar(); });
+    overlay.addEventListener('click', closeSidebar);
+
+    document.getElementById('sidebarLogoutBtn').addEventListener('click', async () => {
       await supabase.auth.signOut();
       window.location.href = '/index.html';
     });
 
-    // ---- Helper ----
-    function escapeHtml(text) {
-      if (!text) return '';
-      const div = document.createElement('div');
-      div.textContent = text;
-      return div.innerHTML;
-    }
-
-    // ---- Load Dashboard Data ----
+    // ---- Dashboard logic (same as before) ----
     async function loadDashboard() {
-      // 1. Get all projects for this user
-      const { data: projects, error: projectsError } = await supabase
-        .from('projects')
-        .select('id, name, status, progress, deadline')
-        .eq('user_id', user.id);
-
-      if (projectsError) {
-        console.error('Error loading projects:', projectsError);
-        return;
-      }
-
-      // 2. Get all tasks for this user's projects
-      // We need tasks linked to these project IDs
+      const { data: projects, error: pErr } = await supabase.from('projects').select('id,name,status,progress,deadline').eq('user_id', user.id);
+      if (pErr) { console.error(pErr); return; }
       const projectIds = projects.map(p => p.id);
       let tasks = [];
       if (projectIds.length > 0) {
-        const { data: tasksData, error: tasksError } = await supabase
-          .from('tasks')
-          .select('status, project_id')
-          .in('project_id', projectIds);
-
-        if (tasksError) {
-          console.error('Error loading tasks:', tasksError);
-        } else {
-          tasks = tasksData || [];
-        }
+        const { data: tData, error: tErr } = await supabase.from('tasks').select('status,project_id').in('project_id', projectIds);
+        if (!tErr) tasks = tData || [];
       }
-
-      // ---- Stats ----
       const totalProjects = projects.length;
       const totalTasks = tasks.length;
       const completedTasks = tasks.filter(t => t.status === 'Completed').length;
-
-      // Upcoming deadlines: projects with deadline within next 7 days and not completed/archived
-      const today = new Date();
-      const nextWeek = new Date(today);
-      nextWeek.setDate(today.getDate() + 7);
-
-      const upcoming = projects.filter(p => {
-        if (!p.deadline) return false;
-        const deadlineDate = new Date(p.deadline);
-        return deadlineDate >= today && deadlineDate <= nextWeek && p.status !== 'Completed' && p.status !== 'Archived';
-      });
-
+      const today = new Date(); const nextWeek = new Date(today); nextWeek.setDate(today.getDate() + 7);
+      const upcoming = projects.filter(p => p.deadline && new Date(p.deadline) >= today && new Date(p.deadline) <= nextWeek && p.status !== 'Completed' && p.status !== 'Archived');
       document.getElementById('totalProjects').textContent = totalProjects;
       document.getElementById('totalTasks').textContent = totalTasks;
       document.getElementById('completedTasks').textContent = completedTasks;
       document.getElementById('upcomingDeadlines').textContent = upcoming.length;
 
-      // ---- Project Status Distribution ----
-      const statusCounts = {
-        'Active': 0,
-        'On Hold': 0,
-        'Completed': 0,
-        'Archived': 0,
-      };
-      projects.forEach(p => {
-        if (statusCounts.hasOwnProperty(p.status)) statusCounts[p.status]++;
-        else statusCounts['Active']++; // fallback
-      });
+      const statusCounts = { 'Active':0, 'On Hold':0, 'Completed':0, 'Archived':0 };
+      projects.forEach(p => { if (statusCounts.hasOwnProperty(p.status)) statusCounts[p.status]++; else statusCounts['Active']++; });
+      const taskStatusCounts = { 'Pending':0, 'In Progress':0, 'Completed':0 };
+      tasks.forEach(t => { if (taskStatusCounts.hasOwnProperty(t.status)) taskStatusCounts[t.status]++; else taskStatusCounts['Pending']++; });
 
-      // ---- Task Status Distribution ----
-      const taskStatusCounts = {
-        'Pending': 0,
-        'In Progress': 0,
-        'Completed': 0,
-      };
-      tasks.forEach(t => {
-        if (taskStatusCounts.hasOwnProperty(t.status)) taskStatusCounts[t.status]++;
-        else taskStatusCounts['Pending']++;
-      });
-
-      // ---- Render Charts (using Chart.js) ----
-      const projectCtx = document.getElementById('projectStatusChart').getContext('2d');
-      new Chart(projectCtx, {
+      new Chart(document.getElementById('projectStatusChart'), {
         type: 'pie',
-        data: {
-          labels: Object.keys(statusCounts),
-          datasets: [{
-            data: Object.values(statusCounts),
-            backgroundColor: ['#8B5CF6', '#FBBF24', '#34D399', '#9CA3AF'], // purple, yellow, green, gray
-            borderWidth: 2,
-            borderColor: '#fff',
-          }]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: {
-            legend: {
-              position: 'bottom',
-              labels: { boxWidth: 12, font: { size: 12 } }
-            }
-          }
-        }
+        data: { labels: Object.keys(statusCounts), datasets: [{ data: Object.values(statusCounts), backgroundColor: ['#8B5CF6','#FBBF24','#34D399','#9CA3AF'], borderWidth: 2, borderColor: '#fff' }] },
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { boxWidth:12, font: { size:12 } } } } }
       });
-
-      const taskCtx = document.getElementById('taskStatusChart').getContext('2d');
-      new Chart(taskCtx, {
+      new Chart(document.getElementById('taskStatusChart'), {
         type: 'pie',
-        data: {
-          labels: Object.keys(taskStatusCounts),
-          datasets: [{
-            data: Object.values(taskStatusCounts),
-            backgroundColor: ['#FCD34D', '#60A5FA', '#34D399'],
-            borderWidth: 2,
-            borderColor: '#fff',
-          }]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: {
-            legend: {
-              position: 'bottom',
-              labels: { boxWidth: 12, font: { size: 12 } }
-            }
-          }
-        }
+        data: { labels: Object.keys(taskStatusCounts), datasets: [{ data: Object.values(taskStatusCounts), backgroundColor: ['#FCD34D','#60A5FA','#34D399'], borderWidth: 2, borderColor: '#fff' }] },
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { boxWidth:12, font: { size:12 } } } } }
       });
 
-      // ---- Upcoming Deadlines Table ----
       const tbody = document.getElementById('deadlineTableBody');
-      if (upcoming.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="4" class="text-center py-8 text-gray-400">No upcoming deadlines in the next 7 days.</td></tr>`;
-        return;
-      }
-
-      // Sort by deadline
-      upcoming.sort((a, b) => new Date(a.deadline) - new Date(b.deadline));
-
+      if (upcoming.length === 0) { tbody.innerHTML = `<tr><td colspan="4" class="text-center py-8 text-gray-400">No upcoming deadlines.</td></tr>`; return; }
+      upcoming.sort((a,b) => new Date(a.deadline) - new Date(b.deadline));
       tbody.innerHTML = upcoming.map(p => `
-        <tr>
-          <td class="px-6 py-4 font-medium text-gray-800">${escapeHtml(p.name)}</td>
-          <td class="px-6 py-4 text-sm text-gray-600">${new Date(p.deadline).toLocaleDateString()}</td>
-          <td class="px-6 py-4">
-            <span class="inline-flex px-3 py-1 text-xs font-semibold rounded-full bg-purple-100 text-purple-800">${p.status || 'Active'}</span>
-          </td>
-          <td class="px-6 py-4">
-            <div class="flex items-center gap-2">
-              <span class="text-sm font-medium text-gray-700">${p.progress || 0}%</span>
-              <div class="flex-1 max-w-[100px] h-2 bg-gray-200 rounded-full overflow-hidden">
-                <div class="h-full bg-purple-600 rounded-full" style="width: ${p.progress || 0}%"></div>
-              </div>
-            </div>
-          </td>
-        </tr>
+        <tr><td class="px-6 py-4 font-medium text-gray-800">${p.name}</td><td class="px-6 py-4 text-sm text-gray-600">${new Date(p.deadline).toLocaleDateString()}</td><td class="px-6 py-4"><span class="inline-flex px-3 py-1 text-xs font-semibold rounded-full bg-purple-100 text-purple-800">${p.status || 'Active'}</span></td><td class="px-6 py-4"><div class="flex items-center gap-2"><span class="text-sm font-medium text-gray-700">${p.progress || 0}%</span><div class="flex-1 max-w-[100px] h-2 bg-gray-200 rounded-full overflow-hidden"><div class="h-full bg-purple-600 rounded-full" style="width:${p.progress || 0}%"></div></div></div></td></tr>
       `).join('');
     }
-
-    // ---- Load ----
     loadDashboard();
   </script>
 </body>
