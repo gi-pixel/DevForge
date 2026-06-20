@@ -98,5 +98,5 @@ loginForm.addEventListener('submit', async (e) => {
 // If user is already authenticated, send them straight to projects.
 const { data: sessionData } = await supabase.auth.getSession();
 if (sessionData?.session) {
-  window.location.href = '/project.html';
+  window.location.href = '/projects.html';
 }
